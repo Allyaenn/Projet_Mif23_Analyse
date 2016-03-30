@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( Analyse)
+find_package( OpenCV REQUIRED )
+include_directories("/Locals/OpenCV-3.1.0/include")
+add_executable( ./analyse main.cpp utils.cpp utils.h)
+target_link_libraries( Extraction ${OpenCV_LIBS} )

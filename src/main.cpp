@@ -39,5 +39,20 @@ int main(int argc, char ** argv){
 	}
 	string filename = String(argv[1]);
 
+	Mat frame;
+	VideoCapture vc = VideoCapture(filename);
+	vc >> frame;
+	namedWindow("Une Fenetre", 1);
+	char c;
+	c = (char)waitKey(30);
+	while(c != 'q' && !frame.empty())
+	{
+		imshow("Une Fenetre", frame);
+		c = (char)waitKey(30);
+		vc >> frame;
+	}
+	vc.release();
+	
+	
 	return EXIT_SUCCESS;
 }

@@ -2,12 +2,13 @@
  * GONNOT Alix
  * PICARD Colas
  *
- * Main du projet Analyse
+ * Main of projet Analyse
  * 
- * Etape 1 : Extraire des objets d'une scene
- * Etape 2 : Segmentation des membres
+ * Step 1 : Foreground extraction
+ * Step 2 : Body part Segmentation
  *
 */
+#include "utils.h"
 #include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -17,7 +18,26 @@
 #include <math.h>
 #include <list>
 
+using namespace cv;
+using namespace std;
 
-int main(int arc, char ** argv){
-	return EXIT_SUCESS;
+
+/**
+ * Main Function
+ * @argc number of arg
+ * @argv array of arg
+ * 
+ */
+int main(int argc, char ** argv){
+
+	/**
+	 * Argument recuperation
+	 */
+	if(argc < 2){
+		usage();
+		return EXIT_FAILURE;
+	}
+	string filename = String(argv[1]);
+
+	return EXIT_SUCCESS;
 }

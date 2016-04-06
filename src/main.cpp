@@ -42,17 +42,18 @@ int main(int argc, char ** argv){
 	Mat frame;
 	VideoCapture vc = VideoCapture(filename);
 	vc >> frame;
-	namedWindow("Une Fenetre", 1);
+	Mat image = spatialSmoothingGauss(frame, 0.2);
+	namedWindow("Originale", 1);
+	namedWindow("Filtree", 1);
 	char c;
 	c = (char)waitKey(30);
-	while(c != 'q' && !frame.empty())
+	while(c != 'q' && !image.empty())
 	{
-		imshow("Une Fenetre", frame);
+		imshow("Filtree", image);
+		imshow("Originale", frame);
 		c = (char)waitKey(30);
-		vc >> frame;
 	}
 	vc.release();
-	
-	
+		
 	return EXIT_SUCCESS;
 }

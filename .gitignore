@@ -1,0 +1,6 @@
+#Fichiers à ignorer
+Analyse
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+

@@ -37,23 +37,53 @@ int main(int argc, char ** argv){
 		usage();
 		return EXIT_FAILURE;
 	}
-	string filename = String(argv[1]);
 
+	/**Nom du fichier vidéo à exploiter*/
+	string filename = String(argv[1]);
+	/** Image actuelle*/
 	Mat frame;
+	/** Image de fond*/
+	Mat background;
+	/**	 Images transformées*/
+	Mat filterdFrame1, filterdFrame2;
+	/** Video*/
 	VideoCapture vc = VideoCapture(filename);
 	vc >> frame;
-	Mat background;
-	cvtColor(frame, background, CV_RGB2GRAY);
-	spatialSmoothingAvg(background, 1);
+
+	/** Passage de l'image en niveau de gris */
+	cvtColor(frame, filterdFrame1, CV_RGB2GRAY);
+	/** Filtre (Moyenne)*/
+	spatialSmoothingAvg(filterdFrame1, 1);
+	filterdFrame2 = frame.clone();
+	spatialSmoothingAvgColor(filterdFrame2, 1);
+
+
+	/** Fenetres d'affichages*/
 	namedWindow("Originale", 1);
-	namedWindow("Filtree", 1);
+	namedWindow("Filtree gris", 1);
+	namedWindow("Filtree couleur", 1);
+	
+	/** Caractère de récupération */
 	char c;
 	c = (char)waitKey(30);
-	while(c != 'q' && !background.empty())
+
+	/**
+	 * Boucle d'éxécution
+	 * Application à la vidéo entière
+	 */
+	while(c != 'q' && !frame.empty())
 	{
-		imshow("Filtree", background);
+		imshow("Filtree gris", filterdFrame1);
+		imshow("Filtree couleur", filterdFrame2);
 		imshow("Originale", frame);
+		vc >> frame;
+		cvtColor(frame, filterdFrame1, CV_RGB2GRAY);
+		spatialSmoothingAvg(filterdFrame1, 1);
+		filterdFrame2 = frame.clone();
+		spatialSmoothingAvgColor(filterdFrame2, 1);
+		
 		c = (char)waitKey(30);
+
 	}
 	vc.release();
 		

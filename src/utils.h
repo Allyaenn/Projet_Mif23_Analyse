@@ -30,3 +30,17 @@ Mat spatialSmoothingGauss(Mat image, double sigma);
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(cv::Mat image, double gamma);
 
+/** 
+ * Retourne vrai sil le pixel est situé à une certaine distance des bords de l'image
+ * */
+bool isScreenEdge(int coordX, int coordY, int maxX, int maxY, double distance);
+
+/**
+ * Renvoi vrai si la différence entre les couleurs des deux pixels est supérieure au seuil
+ */
+bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
+
+/**
+ * Extraction des éléments mouvants d'une image
+ */
+Mat thresholdExtraction(Mat background, Mat image, double seuil);

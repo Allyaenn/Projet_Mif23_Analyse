@@ -16,6 +16,8 @@ using namespace std;
  */
 void usage();
 
+void wrongFormat();
+
 /*Calcul d'un lissage spatial 
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda);
@@ -44,3 +46,7 @@ bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
  * Extraction des éléments mouvants d'une image
  */
 Mat thresholdExtraction(Mat background, Mat image, double seuil);
+
+/*Extraction des pixels au premier plan*/
+void extractForeground(Mat image, String filename);
+

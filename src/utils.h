@@ -16,6 +16,8 @@ using namespace std;
  */
 void usage();
 
+void wrongFormat();
+
 /*Calcul d'un lissage spatial 
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda);
@@ -29,4 +31,7 @@ Mat spatialSmoothingGauss(Mat image, double sigma);
 /*Calcul d'un lissage spatial 
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(cv::Mat image, double gamma);
+
+/*Extraction des pixels au premier plan*/
+void extractForeground(Mat image, String filename);
 

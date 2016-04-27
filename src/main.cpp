@@ -20,41 +20,32 @@
 
 using namespace cv;
 using namespace std;
-
-
 /**
  * Main Function
  * @argc number of arg
  * @argv array of arg
  * 
  */
+ 
 int main(int argc, char ** argv){
 
 	/**
 	 * Argument recuperation
 	 */
-	if(argc < 2){
+	if(argc < 3){
 		usage();
 		return EXIT_FAILURE;
 	}
-	string filename = String(argv[1]);
+	string filename_bg = String(argv[1]);
+	string filename_ps = String(argv[2]);
 
-	Mat frame;
-	VideoCapture vc = VideoCapture(filename);
-	vc >> frame;
 	Mat background;
-	cvtColor(frame, background, CV_RGB2GRAY);
-	spatialSmoothingAvg(background, 1);
-	namedWindow("Originale", 1);
-	namedWindow("Filtree", 1);
-	char c;
-	c = (char)waitKey(30);
-	while(c != 'q' && !background.empty())
-	{
-		imshow("Filtree", background);
-		imshow("Originale", frame);
-		c = (char)waitKey(30);
-	}
+	VideoCapture vc = VideoCapture(filename_bg);
+	vc >> background;
+	spatialSmoothingAvgColor(background, 1);
+	
+	extractForeground(background, filename_ps);
+	
 	vc.release();
 		
 	return EXIT_SUCCESS;

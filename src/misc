@@ -1,0 +1,10 @@
+namedWindow("Originale", 1);
+	namedWindow("Filtree", 1);
+	char c;
+	c = (char)waitKey(30);
+	while(c != 'q' && !background.empty())
+	{
+		imshow("Filtree", background);
+		imshow("Originale", frame);
+		c = (char)waitKey(30);
+	}

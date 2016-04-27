@@ -20,6 +20,8 @@ void usage();
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda);
 
+Mat spatialSmoothingAvgColor(Mat image, double lambda);
+
 /*Calcul d'un lissage spatial 
   noyau = Gaussienne*/
 Mat spatialSmoothingGauss(Mat image, double sigma);
@@ -27,3 +29,4 @@ Mat spatialSmoothingGauss(Mat image, double sigma);
 /*Calcul d'un lissage spatial 
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(cv::Mat image, double gamma);
+

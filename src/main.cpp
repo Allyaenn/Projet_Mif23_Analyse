@@ -42,14 +42,16 @@ int main(int argc, char ** argv){
 	Mat frame;
 	VideoCapture vc = VideoCapture(filename);
 	vc >> frame;
-	Mat image = spatialSmoothingGauss(frame, 0.2);
+	Mat background;
+	cvtColor(frame, background, CV_RGB2GRAY);
+	spatialSmoothingAvg(background, 1);
 	namedWindow("Originale", 1);
 	namedWindow("Filtree", 1);
 	char c;
 	c = (char)waitKey(30);
-	while(c != 'q' && !image.empty())
+	while(c != 'q' && !background.empty())
 	{
-		imshow("Filtree", image);
+		imshow("Filtree", background);
 		imshow("Originale", frame);
 		c = (char)waitKey(30);
 	}

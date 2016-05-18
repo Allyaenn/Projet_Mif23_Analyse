@@ -37,26 +37,21 @@ int main(int argc, char ** argv){
 		return EXIT_FAILURE;
 	}
 
-	/**Nom des fichiers vidéos à exploiter*/
+    /*Nom des fichiers vidéos à exploiter*/
 	string filename_bg = String(argv[1]);
 	string filename_ps = String(argv[2]);
 
 	/** Image actuelle*/
 	Mat frame;
 	/** Image de fond*/
-	Mat background;
+    Mat background;// = temporalSmoothing(filename_bg);
 	/** Video*/
-	VideoCapture vc = VideoCapture(filename);
-	vc >> frame;
+    VideoCapture vc = VideoCapture(filename_bg);
+    vc >> background;
 
-	
-	VideoCapture vc = VideoCapture(filename_bg);
-	vc >> background;
 	spatialSmoothingAvgColor(background, 1);
 	
 	extractForeground(background, filename_ps);
-	
-	vc.release();
 		
 	return EXIT_SUCCESS;
 }

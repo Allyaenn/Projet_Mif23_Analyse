@@ -47,6 +47,10 @@ bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
  */
 Mat thresholdExtraction(Mat background, Mat image, double seuil);
 
-/*Extraction des pixels au premier plan*/
+/**Extraction des pixels au premier plan*/
 void extractForeground(Mat image, String filename);
 
+/**
+ * Lissage temporel
+ */
+Mat temporalSmoothing(String filename);

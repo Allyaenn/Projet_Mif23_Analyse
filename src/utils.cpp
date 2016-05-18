@@ -1,14 +1,21 @@
 #include "utils.h"
 
+/**
+ * Message d'erreur en cas de mauvais appel au programme
+ */
 void usage(){
 	cout << "Error : expected usage" << endl << "./Analyse <video>" << endl;
 }
 
+/**
+ * Message d'erreur en cas de mauvaises dimensions
+ */
 void wrongFormat(){
 	std::cout<<"Error  : wrong size for used pictures, they have to be of equal sizes"<<std::endl;
 }
 
-/*Calcul d'un lissage spatial 
+/**
+ * Calcul d'un lissage spatial
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda)
 {
@@ -63,7 +70,8 @@ Mat spatialSmoothingAvgColor(Mat image, double lambda)
 }
 
 
-/*Calcul d'un lissage spatial 
+/**
+ * Calcul d'un lissage spatial
   noyau = Gaussienne*/
 Mat spatialSmoothingGauss(Mat image, double sigma)
 {
@@ -94,7 +102,8 @@ Mat spatialSmoothingGauss(Mat image, double sigma)
 
 //moyenne -> on a un carré donc tant pis pour le sinon !
 
-/*Calcul d'un lissage spatial 
+/**
+ * Calcul d'un lissage spatial
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(Mat image, double gamma)
 {
@@ -183,34 +192,39 @@ Mat thresholdExtraction(Mat background, Mat image, double seuil){
 }
 
 /**
- * TODO Documenter la méthode (nom, action,argument, retour)
+ * Extrait les éléments mouvants issus du fichier vidéo contenu dans l'argument @filename
+ * en comparant par rapport à  l'image de fond passée dans l'argument @Background
+ * @backgound Matrice contenant l'image de fond
+ * @filename nom du fichier contenant la vidéo à extraire
  */
 void extractForeground(Mat background, String filename)
 {
-	namedWindow("Background", 1);
+    //namedWindow("Background", 1);
 	namedWindow("Perso", 1);
 	
-	//extraction des différentes images du fichier vidéo
+    /*extraction des différentes images du fichier vidéo*/
 	Mat frame;
 	VideoCapture vc = VideoCapture(filename);
 	vc >> frame;
-	int seuil = 20;
+    int seuil = 18;
 	
+    /*Vérification de la correspondance des dimensions*/
 	if (background.rows == frame.rows && background.cols == frame.cols)
 	{
-		//création de l'image qui contiendra le résultat
+        /*création de l'image qui contiendra le résultat*/
 		Mat res = Mat(frame.size(), frame.type());
+        Mat restauration = background.clone();
 		std::cout<<res.rows<<" - "<<res.cols<<std::endl;
 		char c;
 		c = (char)waitKey(30);
 		while(c != 'q' && !frame.empty())
 		{
-			//application du filtre sur la frame
+            /*application du filtre sur la frame*/
 			spatialSmoothingAvgColor(frame, 1);
 		
 		
-			//comparaison de l'image avec l'arrière-plan
-			//et construction d'une image où les différences apparaissent
+            /*comparaison de l'image avec l'arrière-plan
+            et construction d'une image où les différences apparaissent*/
 			for (int i = 0; i<frame.rows; i++)
 			{
 				for (int j = 0; j<frame.cols; j++)
@@ -222,11 +236,13 @@ void extractForeground(Mat background, String filename)
 					
 						//res.at<Vec3b>(i,j) = Vec3b(0,0,255);
 						res.at<Vec3b>(i,j) = frame.at<Vec3b>(i,j);
+                        background.at<Vec3b>(i,j) = restauration.at<Vec3b>(i,j);
 						
 					}
 					else{
 					
 						res.at<Vec3b>(i,j) = Vec3b(100,100,100);
+                        background.at<Vec3b>(i, j) = frame.at<Vec3b>(i,j);
 					}
 				}
 			}
@@ -246,3 +262,46 @@ void extractForeground(Mat background, String filename)
 	vc.release();
 }
 
+/**
+ * Lissage temporel
+ */
+Mat temporalSmoothing(String filename){
+
+    /*Résultat à renvoyer*/
+    Mat background;
+    /*Ensemble des 10 premières frames de la vidéos*/
+    Mat stockage[10];
+    /** Video*/
+    VideoCapture vc = VideoCapture(filename);
+    double h = 0.1;
+
+    /*Récupération des dix premières images*/
+    for(int i = 0; i< 10; i++){
+        vc >> stockage[i];
+    }
+    background = Mat(stockage[0].size(), stockage[0].type());
+
+    /*
+     * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
+     * respectifs de chaque image
+     */
+    for(int x = 0; x < background.rows; x++){
+        for(int y = 0; y < background.cols; y ++){
+            for(int k = 0; k < 3; k++)
+            {
+                //calcul de la convolution pour chaque composante couleur
+                int res = 0;
+                for (int u = 0; u < 10; u++)
+                {
+
+                    res = res + (h*(stockage[u].at<Vec3b>(x, y)[k]));
+                }
+                background.at<Vec3b>(x,y)[k] = res;
+            }
+
+        }
+    }
+    vc.release();
+    spatialSmoothingAvgColor(background, 1);
+    return background;
+}

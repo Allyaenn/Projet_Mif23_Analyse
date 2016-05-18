@@ -192,74 +192,48 @@ Mat thresholdExtraction(Mat background, Mat image, double seuil){
 }
 
 /**
- * Extrait les éléments mouvants issus du fichier vidéo contenu dans l'argument @filename
+ * Extrait les éléments mouvants de @frame
  * en comparant par rapport à  l'image de fond passée dans l'argument @Background
  * @backgound Matrice contenant l'image de fond
- * @filename nom du fichier contenant la vidéo à extraire
+ * @frame Matrice contenant l'image complete
+ * @return les éléments mouvants extraits de frame
  */
-void extractForeground(Mat background, String filename)
+Mat extractForeground(Mat background, Mat frame)
 {
-    //namedWindow("Background", 1);
-	namedWindow("Perso", 1);
-	
-    /*extraction des différentes images du fichier vidéo*/
-	Mat frame;
-	VideoCapture vc = VideoCapture(filename);
-	vc >> frame;
+    Mat res;
     int seuil = 18;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == frame.rows && background.cols == frame.cols)
 	{
-        /*création de l'image qui contiendra le résultat*/
-		Mat res = Mat(frame.size(), frame.type());
-        Mat restauration = background.clone();
-		std::cout<<res.rows<<" - "<<res.cols<<std::endl;
-		char c;
-		c = (char)waitKey(30);
-		while(c != 'q' && !frame.empty())
-		{
-            /*application du filtre sur la frame*/
-			spatialSmoothingAvgColor(frame, 1);
-		
-		
-            /*comparaison de l'image avec l'arrière-plan
-            et construction d'une image où les différences apparaissent*/
-			for (int i = 0; i<frame.rows; i++)
-			{
-				for (int j = 0; j<frame.cols; j++)
-				{
-					
-					if(abs(frame.at<Vec3b>(i,j)[0] - background.at<Vec3b>(i,j)[0]) > seuil
-					|| abs(frame.at<Vec3b>(i,j)[1] - background.at<Vec3b>(i,j)[1]) > seuil
-					|| abs(frame.at<Vec3b>(i,j)[2] - background.at<Vec3b>(i,j)[2]) > seuil){
-					
-						//res.at<Vec3b>(i,j) = Vec3b(0,0,255);
-						res.at<Vec3b>(i,j) = frame.at<Vec3b>(i,j);
-                        background.at<Vec3b>(i,j) = restauration.at<Vec3b>(i,j);
-						
-					}
-					else{
-					
-						res.at<Vec3b>(i,j) = Vec3b(100,100,100);
-                        background.at<Vec3b>(i, j) = frame.at<Vec3b>(i,j);
-					}
-				}
-			}
-		
-			//affichage de l'image différence
-			imshow("Perso", res);
-			vc >> frame;
-			c = (char)waitKey(30);
-		
-			//enregistrement de la vidéo ??
-		}
+        res = Mat(frame.size(), frame.type());
+
+        /*comparaison de l'image avec l'arrière-plan
+        et construction d'une image où les différences apparaissent*/
+        for (int i = 0; i<frame.rows; i++)
+        {
+            for (int j = 0; j<frame.cols; j++)
+            {
+
+                if(abs(frame.at<Vec3b>(i,j)[0] - background.at<Vec3b>(i,j)[0]) > seuil
+                || abs(frame.at<Vec3b>(i,j)[1] - background.at<Vec3b>(i,j)[1]) > seuil
+                || abs(frame.at<Vec3b>(i,j)[2] - background.at<Vec3b>(i,j)[2]) > seuil){
+
+                    //res.at<Vec3b>(i,j) = Vec3b(0,0,255);
+                    res.at<Vec3b>(i,j) = frame.at<Vec3b>(i,j);
+
+                }
+                else{
+
+                    res.at<Vec3b>(i,j) = Vec3b(100,100,100);
+                }
+            }
+        }
 	}
 	else{
 		wrongFormat();
 	}
-	
-	vc.release();
+    return res;
 }
 
 /**

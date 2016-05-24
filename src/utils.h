@@ -29,9 +29,13 @@ Mat spatialSmoothingAvgColor(Mat image, double lambda);
   noyau = Gaussienne*/
 Mat spatialSmoothingGauss(Mat image, double sigma);
 
+Mat spatialSmoothingGaussColor(Mat image, double sigma);
+
 /*Calcul d'un lissage spatial 
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(cv::Mat image, double gamma);
+
+Mat spatialSmoothingExpColor(cv::Mat image, double gamma);
 
 /** 
  * Retourne vrai sil le pixel est situé à une certaine distance des bords de l'image
@@ -49,6 +53,8 @@ bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
 Mat thresholdExtraction(Mat background, Mat image, double seuil);
 
 /**Extraction des pixels au premier plan*/
+Mat extractForegroundColor(Mat background, Mat frame);
+
 Mat extractForeground(Mat background, Mat frame);
 
 /**

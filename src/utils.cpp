@@ -19,54 +19,64 @@ void wrongFormat(){
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda)
 {
-	double h;
-	for(int i = 1; i<image.rows; i++)
+	Mat copie = image;
+	double h = 1.0/(pow(lambda,2));
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	int res0, res1, res2; //des int pour eviter le dépassement de capacité
+	int coordMin = -lambda/2;
+	int coordMax = lambda/2;
+	for(int i = 1; i<lignes-1; i++)
 	{
-		for(int j = 1; j<image.cols; j++)
+		for(int j = 1; j<colonnes-1; j++)
 		{
-			//calcul du noyau
-			unsigned char res = 0;
-			for (int u = -1; u < 2; u++)
+			//calcul de la convolution pour chaque composante couleur
+			res0 = res1 = res2 = 0;
+			for (int u = coordMin; u <= coordMax; u++)
 			{
-				for (int v = -1; v < 2; v++)
+				for (int v = coordMin; v <= coordMax; v++)
 				{	
-					double h = 1.0/9.0;
-					//cout<<"h : "<<h<<" u : "<<u<<" v :"<<v<<std::endl;
-					res = res + (h*image.at<unsigned char>(i+u,j+v));
+					res0 += image.data[(i+u)*colonnes+(j+v)];
 				}
 			} 
-			image.at<unsigned char>(i,j) = res;
+			copie.data[i*colonnes+j] = (unsigned char)(res0 * h); //on repasse en char
 		}
 	}
-	
-	return image;
+	return copie;
 }
 
 Mat spatialSmoothingAvgColor(Mat image, double lambda)
 {
-	double h;
-	for(int i = 1; i<image.rows; i++)
+	Mat copie = image;
+	
+	double h = 1.0/(pow(lambda,2));
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	int res0, res1, res2;
+	int lambdasur2 = lambda/2;
+	int coordMin = -lambda/2;
+	int coordMax = lambda/2;
+	for(int i = lambdasur2; i<lignes-lambdasur2; i++)
 	{
-		for(int j = 1; j<image.cols; j++)
+		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
-			for(int k = 0; k < 3; k++)
+			//calcul de la convolution pour chaque composante couleur
+			res0 = res1 = res2 = 0;
+			for (int u = coordMin; u <= coordMax; u++)
 			{
-				//calcul de la convolution pour chaque composante couleur
-				int res = 0;
-				for (int u = -1; u < 2; u++)
+				for (int v = coordMin; v <= coordMax; v++)
 				{
-					for (int v = -1; v < 2; v++)
-					{	
-						double h = 1.0/9.0;
-						res = res + (h*(image.at<Vec3b>(i+u,j+v)[k]));
-					}
-				} 
-				image.at<Vec3b>(i,j)[k] = res;
-			}
+					res0 += image.data[(i+u)*colonnes*3+(j+v)*3+0];
+					res1 += image.data[(i+u)*colonnes*3+(j+v)*3+1];
+					res2 += image.data[(i+u)*colonnes*3+(j+v)*3+2];
+				}
+			} 
+			copie.data[i*colonnes*3+j*3+0] = res0 * h;
+			copie.data[i*colonnes*3+j*3+1] = res1 * h;
+			copie.data[i*colonnes*3+j*3+2] = res2 * h;
 		}
 	}
-	
-	return image;
+	return copie;
 }
 
 
@@ -75,30 +85,90 @@ Mat spatialSmoothingAvgColor(Mat image, double lambda)
   noyau = Gaussienne*/
 Mat spatialSmoothingGauss(Mat image, double sigma)
 {
+	Mat copie = image;
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	double res;
 	const double pi = 3.14159265358979323846;
+	double coeff =  (1/(2*pi*pow(sigma,2)));
+	double unsur2sig = 1/(2*sigma);
+	double h;
 	
-	for(int i = 1; i<image.rows; i++)
+	std::vector<double> refu_v;
+	
+	for(int i = 0; i<3; i++)
 	{
-		for(int j = 1; j < image.cols; j++)
+		for(int j = 0; j < 3; j++)
 		{
-				unsigned char res = 0;
+			refu_v.push_back(coeff *exp((-pow(i-1,2)-pow(j-1,2))*unsur2sig));
+		}
+	}
+	
+	for(int i = 1; i<lignes-1; i++)
+	{
+		for(int j = 1; j < colonnes-1; j++)
+		{
+				res = 0;
 				for (int u = -1; u < 2; u++)
 				{
 					for (int v = -1; v < 2; v++)
 					{	
-						double h = (1/(2*pi*pow(sigma,2)))*exp((-pow(u,2)-pow(v,2))/(2*sigma));
-						//cout<<"h : "<<h<<" u : "<<u<<" v :"<<v<<std::endl;
-						res = res + (h*(image.at<unsigned char>(i+u,j+v)));
+						h = refu_v[(u+1)*3+(v+1)];
+						res += h*(image.data[(i+u)*colonnes+(j+v)]);
 					}
 				} 
-				image.at<unsigned char>(i,j) = res;
+				copie.data[i*colonnes+j] = (unsigned char)(res);
 		}
 	}
-	return image;	
+	return copie;	
 }
 
-
 //BGR
+Mat spatialSmoothingGaussColor(Mat image, double sigma)
+{
+	Mat copie = image;
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	double res0, res1, res2;
+	const double pi = 3.14159265358979323846;
+	double coeff =  (1/(2*pi*pow(sigma,2)));
+	double unsur2sig = 1/(2*sigma);
+	double h;
+	
+	std::vector<double> refu_v;
+	
+	for(int i = 0; i<3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			refu_v.push_back(coeff *exp((-pow(i-1,2)-pow(j-1,2))*unsur2sig));
+		}
+	}
+	
+	for(int i = 1; i<lignes-1; i++)
+	{
+		for(int j = 1; j < colonnes-1; j++)
+		{
+				res0 = res1 = res2 = 0;
+				for (int u = -1; u < 2; u++)
+				{
+					for (int v = -1; v < 2; v++)
+					{	
+						h = refu_v[(u+1)*3+(v+1)];
+						//res += h*(image.data[(i+u)*colonnes+(j+v)]);
+						res0 += h * image.data[(i+u)*colonnes*3+(j+v)*3+0];
+						res1 += h * image.data[(i+u)*colonnes*3+(j+v)*3+1];
+						res2 += h * image.data[(i+u)*colonnes*3+(j+v)*3+2];
+					}
+				} 
+				//copie.data[i*colonnes+j] = (unsigned char)(res);
+				copie.data[i*colonnes*3+j*3+0] = (unsigned char) res0;
+				copie.data[i*colonnes*3+j*3+1] = (unsigned char) res1;
+				copie.data[i*colonnes*3+j*3+2] = (unsigned char) res2;
+		}
+	}
+	return copie;	
+}
 
 //moyenne -> on a un carré donc tant pis pour le sinon !
 
@@ -107,18 +177,84 @@ Mat spatialSmoothingGauss(Mat image, double sigma)
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(Mat image, double gamma)
 {
+	Mat copie = image;
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	double res;
 	double h;
-	for(int i = 0; i<image.rows; i++)
+	double coeff = pow(gamma, 2)/4;
+	
+	std::vector<double> refu_v;
+	
+	for(int i = 0; i<3; i++)
 	{
-		for(int i = 0; i<image.rows; i++)
+		for(int j = 0; j < 3; j++)
 		{
-			//calcul du noyau 
-
-			//calcul de la convolution
+			refu_v.push_back(coeff * exp(-gamma *(abs(i-1)+abs(j-1))));
 		}
 	}
 	
-	return image;
+	for(int i = 1; i<lignes-1; i++)
+	{
+		for(int j = 1; j < colonnes-1; j++)
+		{
+				res = 0;
+				for (int u = -1; u < 2; u++)
+				{
+					for (int v = -1; v < 2; v++)
+					{	
+						h = refu_v[(u+1)*3+(v+1)];
+						res += h*(image.data[(i+u)*colonnes+(j+v)]);
+					}
+				} 
+				copie.data[i*colonnes+j] = (unsigned char)(res);
+		}
+	}
+	return copie;	
+}
+
+Mat spatialSmoothingExpColor(Mat image, double gamma)
+{
+	Mat copie = image;
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	double res0, res1, res2;
+	double h;
+	double coeff = pow(gamma, 2)/4;
+	
+	std::vector<double> refu_v;
+	
+	for(int i = 0; i<3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			refu_v.push_back(coeff * exp(-gamma *(abs(i-1)+abs(j-1))));
+		}
+	}
+	
+	for(int i = 1; i<lignes-1; i++)
+	{
+		for(int j = 1; j < colonnes-1; j++)
+		{
+				res0 = res1 = res2 = 0;
+				for (int u = -1; u < 2; u++)
+				{
+					for (int v = -1; v < 2; v++)
+					{	
+						h = refu_v[(u+1)*3+(v+1)];
+						//res += h*(image.data[(i+u)*colonnes+(j+v)]);
+						res0 += h * image.data[(i+u)*colonnes*3+(j+v)*3+0];
+						res1 += h * image.data[(i+u)*colonnes*3+(j+v)*3+1];
+						res2 += h * image.data[(i+u)*colonnes*3+(j+v)*3+2];
+					}
+				} 
+				//copie.data[i*colonnes+j] = (unsigned char)(res);
+				copie.data[i*colonnes*3+j*3+0] = (unsigned char) res0;
+				copie.data[i*colonnes*3+j*3+1] = (unsigned char) res1;
+				copie.data[i*colonnes*3+j*3+2] = (unsigned char) res2;
+		}
+	}
+	return copie;	
 }
 
 
@@ -198,10 +334,10 @@ Mat thresholdExtraction(Mat background, Mat image, double seuil){
  * @frame Matrice contenant l'image complete
  * @return les éléments mouvants extraits de frame
  */
-Mat extractForeground(Mat background, Mat frame)
+Mat extractForegroundColor(Mat background, Mat frame)
 {
     Mat res;
-    int seuil = 18;
+    int seuil = 10;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == frame.rows && background.cols == frame.cols)
@@ -226,6 +362,42 @@ Mat extractForeground(Mat background, Mat frame)
                 else{
 
                     res.at<Vec3b>(i,j) = Vec3b(100,100,100);
+                }
+            }
+        }
+	}
+	else{
+		wrongFormat();
+	}
+    return res;
+}
+
+Mat extractForeground(Mat background, Mat frame)
+{
+    Mat res;
+    int seuil = 10;
+	
+    /*Vérification de la correspondance des dimensions*/
+	if (background.rows == frame.rows && background.cols == frame.cols)
+	{
+        res = Mat(frame.size(), frame.type());
+
+        /*comparaison de l'image avec l'arrière-plan
+        et construction d'une image où les différences apparaissent*/
+        for (int i = 0; i<frame.rows; i++)
+        {
+            for (int j = 0; j<frame.cols; j++)
+            {
+
+                if(abs(frame.at<unsigned char>(i,j) - background.at<unsigned char>(i,j)) > seuil){
+
+                    //res.at<Vec3b>(i,j) = Vec3b(0,0,255);
+                    res.at<unsigned char>(i,j) = frame.at<unsigned char>(i,j);
+
+                }
+                else{
+
+                    res.at<unsigned char>(i,j) = 100;
                 }
             }
         }

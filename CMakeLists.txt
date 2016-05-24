@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(Analyse)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 find_package( OpenCV REQUIRED )
 include_directories("/Locals/OpenCV-3.1.0/include")
 add_executable( Analyse src/main.cpp src/utils.cpp src/utils.h src/Bloc_Region.cpp src/Bloc_Region.h )

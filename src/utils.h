@@ -7,6 +7,8 @@
 #include <cmath>
 #include <list>
 
+#include "Bloc_Region.h"
+
 using namespace cv;
 using namespace std;
 
@@ -34,4 +36,6 @@ Mat spatialSmoothingExp(cv::Mat image, double gamma);
 
 /*Extraction des pixels au premier plan*/
 void extractForeground(Mat image, String filename);
+
+void splitAndMerge(Mat image);
 

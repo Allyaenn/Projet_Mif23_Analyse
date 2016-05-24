@@ -173,3 +173,12 @@ void extractForeground(Mat background, String filename)
 	vc.release();
 }
 
+void splitAndMerge(Mat image)
+{
+	std::list<Bloc*> blocs;
+	Bloc premierBloc;
+	
+	std::cout<<"g : "<<image.cols<<std::endl;
+	std::cout<<"b : "<<image.rows<<std::endl;
+}
+

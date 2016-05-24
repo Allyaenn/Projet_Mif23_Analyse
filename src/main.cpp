@@ -36,17 +36,37 @@ int main(int argc, char ** argv){
 		usage();
 		return EXIT_FAILURE;
 	}
+
+    /*Nom des fichiers vidéos à exploiter*/
 	string filename_bg = String(argv[1]);
 	string filename_ps = String(argv[2]);
 
-	Mat background;
-	VideoCapture vc = VideoCapture(filename_bg);
-	vc >> background;
+	/** Image actuelle*/
+	Mat frame;
+	/** Image de fond*/
+    Mat background;// = temporalSmoothing(filename_bg);
+    /** Image extraite*/
+    Mat perso;
+	/** Video*/
+    VideoCapture vc = VideoCapture(filename_bg);
+    vc >> background;
+
+    VideoCapture vcP = VideoCapture(filename_ps);
+    vcP >> frame;
+
+    namedWindow("Perso", 1);
+
 	spatialSmoothingAvgColor(background, 1);
-	
-	extractForeground(background, filename_ps);
-	
-	vc.release();
+    char c;
+    c = (char)waitKey(30);
+    while(c != 'q' && !frame.empty())
+    {
+        spatialSmoothingAvgColor(frame, 1);
+        perso = extractForeground(background, frame);
+        imshow("Perso", perso);
+        c = (char)waitKey(30);
+        vcP >> frame;
+    }
 		
 	return EXIT_SUCCESS;
 }

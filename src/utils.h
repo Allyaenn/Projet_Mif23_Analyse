@@ -12,7 +12,6 @@
 using namespace cv;
 using namespace std;
 
-
 /**
  * Usage of the program
  */
@@ -34,8 +33,30 @@ Mat spatialSmoothingGauss(Mat image, double sigma);
   noyau = fonction exponentielle*/
 Mat spatialSmoothingExp(cv::Mat image, double gamma);
 
-/*Extraction des pixels au premier plan*/
-void extractForeground(Mat image, String filename);
+/** 
+ * Retourne vrai sil le pixel est situé à une certaine distance des bords de l'image
+ * */
+bool isScreenEdge(int coordX, int coordY, int maxX, int maxY, double distance);
 
+/**
+ * Renvoi vrai si la différence entre les couleurs des deux pixels est supérieure au seuil
+ */
+bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
+
+/**
+ * Extraction des éléments mouvants d'une image
+ */
+Mat thresholdExtraction(Mat background, Mat image, double seuil);
+
+/**Extraction des pixels au premier plan*/
+Mat extractForeground(Mat background, Mat frame);
+
+/**
+ * Lissage temporel
+ */
+Mat temporalSmoothing(String filename);
+/**
+* Segementation de l'image par la méthode Split and Merge
+* Le critère de segmentation/fusion se base sur la couleur
+*/
 void splitAndMerge(Mat image);
-

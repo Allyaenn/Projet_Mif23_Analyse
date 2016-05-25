@@ -45,12 +45,7 @@ bool isScreenEdge(int coordX, int coordY, int maxX, int maxY, double distance);
 /**
  * Renvoi vrai si la différence entre les couleurs des deux pixels est supérieure au seuil
  */
-bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil);
-
-/**
- * Extraction des éléments mouvants d'une image
- */
-Mat thresholdExtraction(Mat background, Mat image, double seuil);
+bool pixelColorDifference(Vec3b pixA, Vec3b pixB, double seuil);
 
 /**Extraction des pixels au premier plan*/
 Mat extractForegroundColor(Mat background, Mat frame);
@@ -65,4 +60,10 @@ Mat temporalSmoothing(String filename);
 * Segementation de l'image par la méthode Split and Merge
 * Le critère de segmentation/fusion se base sur la couleur
 */
-void splitAndMerge(Mat & image);
+void splitAndMerge(Mat image);
+
+/**
+ * Lissage par rapport aux n voisins
+ */
+Mat lissageCouleur(Mat image, int nbrVoisin, int requis);
+

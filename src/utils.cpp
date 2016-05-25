@@ -284,7 +284,7 @@ bool isScreenEge(int coordX, int coordY, int maxX, int maxY, double distance){
 /**
  * Renvoi vrai si la différence entre les couleurs des deux pixels est supérieure au seuil
  */
-bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil){
+bool pixelColorDifference(Vec3b pixA, Vec3b pixB, double seuil){
 
 	if(abs(pixA[0] - pixB[0]) > seuil||
 			abs(pixA[1] - pixB[1]) > seuil ||
@@ -294,38 +294,7 @@ bool colorPixelDifference(Vec3b pixA, Vec3b pixB, double seuil){
 	return false;
 
 }
-/**
- * Extraction des éléments mouvants d'une image
- * @background : image de comparaison
- * @image : image actuelle, dont les différences sont extraites
- * @seuil : valeur étalon pour déterminer une différence
- * @return : une image composé des pixels différents entre image et background
- */
-Mat thresholdExtraction(Mat background, Mat image, double seuil){
 
-	/* Création de l'image à retourner*/
-	Mat retour(image.size(), image.type());
-
-	/* Boucle d'extraction des différences */
-	for(int x = 0; x < image.rows; x++){
-
-		for(int y = 0; y < image.cols; y++){
-
-			if(colorPixelDifference(
-						background.at<Vec3b>(x, y),
-						image.at<Vec3b>(x, y),
-						seuil)){
-				retour.at<Vec3b>(x, y) = image.at<Vec3b>(x, y);
-			}else{
-				retour.at<Vec3b>(x, y) = Vec3b(0, 0, 0);
-			}
-		}
-	}
-
-	return retour;
-
-
-}
 
 /**
  * Extrait les éléments mouvants de @frame
@@ -351,9 +320,9 @@ Mat extractForegroundColor(Mat background, Mat frame)
             for (int j = 0; j<frame.cols; j++)
             {
 
-                if(abs(frame.at<Vec3b>(i,j)[0] - background.at<Vec3b>(i,j)[0]) > seuil
-                || abs(frame.at<Vec3b>(i,j)[1] - background.at<Vec3b>(i,j)[1]) > seuil
-                || abs(frame.at<Vec3b>(i,j)[2] - background.at<Vec3b>(i,j)[2]) > seuil){
+				if(pixelColorDifference(frame.at<Vec3b>(i,j), 
+							background.at<Vec3b>(i,j), seuil))
+				{
 
                     //res.at<Vec3b>(i,j) = Vec3b(0,0,255);
                     res.at<Vec3b>(i,j) = frame.at<Vec3b>(i,j);
@@ -448,7 +417,7 @@ Mat temporalSmoothing(String filename){
         }
     }
     vc.release();
-    spatialSmoothingAvgColor(background, 1);
+    //spatialSmoothingAvgColor(background, 1);
     return background;
 }
 
@@ -504,4 +473,39 @@ void splitAndMerge(Mat & image)
 //		}
 //	}
 	
+}
+
+
+/**
+ * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
+ */
+Mat lissageCouleur(Mat image, int nbrVoisin, int requis){
+	
+	Mat retour(image.size(), image.type());
+	int count;
+
+	for(int x = nbrVoisin; x < image.rows - 1 - nbrVoisin; x++){
+		for(int y = nbrVoisin; y < image.cols - 1 - nbrVoisin; y++){
+			if(retour.at<Vec3b>(x,y) != Vec3b(100,100,100)){
+
+				count = 0;
+				for(int i = -1 * nbrVoisin; i < nbrVoisin + 1; i++){
+					for(int j = -1 * nbrVoisin; j < nbrVoisin + 1; j++){
+						if(retour.at<Vec3b>(x + i,y + j) != Vec3b(100,100,100))
+							count++;
+						if(count > requis)
+							break;
+					}
+					if(count > requis)
+						break;
+				}
+				count--;
+				if(count < requis){
+					retour.at<Vec3b>(x,y) = Vec3b(100,100,100);
+				}
+			}
+		}
+	}
+	return retour;
+
 }

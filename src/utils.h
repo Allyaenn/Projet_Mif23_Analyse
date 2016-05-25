@@ -65,4 +65,4 @@ Mat temporalSmoothing(String filename);
 * Segementation de l'image par la méthode Split and Merge
 * Le critère de segmentation/fusion se base sur la couleur
 */
-void splitAndMerge(Mat image);
+void splitAndMerge(Mat & image);

@@ -65,7 +65,7 @@ int main(int argc, char ** argv){
 
     namedWindow("Perso", 1);
 
-	spatialSmoothingAvgColor(background, 3);
+	spatialSmoothingGaussColor(background, 1);
     char c;
     c = (char)waitKey(1);
     steady_clock::time_point start, end;
@@ -73,7 +73,7 @@ int main(int argc, char ** argv){
     {
     	start = steady_clock::now();
     	cvtColor(frame, frame_NB, CV_BGR2GRAY);
-        spatialSmoothingAvgColor(frame, 3);
+        spatialSmoothingGaussColor(frame, 1);
         perso = extractForegroundColor(background, frame);
         //perso = frame;
         imshow("Perso", perso);
@@ -84,6 +84,14 @@ int main(int argc, char ** argv){
     }
     
     splitAndMerge(perso);
-		
+    char d;
+    d = (char)waitKey(1);
+    namedWindow("Test", 1);
+    while(d != 'q')
+    {
+   		 imshow("Test", perso);
+   		 d = (char)waitKey(1);
+   	}
+   	
 	return EXIT_SUCCESS;
 }

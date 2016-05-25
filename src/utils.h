@@ -66,3 +66,4 @@ void splitAndMerge(Mat image);
  * Lissage par rapport aux n voisins
  */
 Mat lissageCouleur(Mat image, int nbrVoisin, int requis);
+

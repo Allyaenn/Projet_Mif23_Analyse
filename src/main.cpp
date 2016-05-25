@@ -73,8 +73,8 @@ int main(int argc, char ** argv){
     steady_clock::time_point start, end;
     while(c != 'q' && !frame.empty())
     {
-    	//start = steady_clock::now();
-    	//cvtColor(frame, frame_NB, CV_BGR2GRAY);
+    	start = steady_clock::now();
+    	cvtColor(frame, frame_NB, CV_BGR2GRAY);
         spatialSmoothingGaussColor(frame, 1);
         perso = extractForegroundColor(background, frame);
         //perso = frame;
@@ -88,6 +88,14 @@ int main(int argc, char ** argv){
     }
 
     splitAndMerge(perso);
-		
+    char d;
+    d = (char)waitKey(1);
+    namedWindow("Test", 1);
+    while(d != 'q')
+    {
+   		 imshow("Test", perso);
+   		 d = (char)waitKey(1);
+   	}
+   	
 	return EXIT_SUCCESS;
 }

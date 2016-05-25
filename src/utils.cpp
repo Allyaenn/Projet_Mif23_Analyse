@@ -306,7 +306,7 @@ bool pixelColorDifference(Vec3b pixA, Vec3b pixB, double seuil){
 Mat extractForegroundColor(Mat background, Mat frame)
 {
     Mat res;
-    int seuil = 10;
+    int seuil = 16;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == frame.rows && background.cols == frame.cols)
@@ -330,7 +330,7 @@ Mat extractForegroundColor(Mat background, Mat frame)
                 }
                 else{
 
-                    res.at<Vec3b>(i,j) = Vec3b(100,100,100);
+                    res.at<Vec3b>(i,j) = Vec3b(0,100,0);
                 }
             }
         }
@@ -344,7 +344,7 @@ Mat extractForegroundColor(Mat background, Mat frame)
 Mat extractForeground(Mat background, Mat frame)
 {
     Mat res;
-    int seuil = 10;
+    int seuil = 25;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == frame.rows && background.cols == frame.cols)
@@ -421,13 +421,56 @@ Mat temporalSmoothing(String filename){
     return background;
 }
 
-void splitAndMerge(Mat image)
+void splitAndMerge(Mat & image)
 {
 	std::list<Bloc*> blocs;
-	Bloc premierBloc;
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	int xmin, xmax, ymin, ymax;
+	ymin = image.rows+1;
+	ymax = -1;
+	xmin = image.cols+1;
+	xmax = -1;
 	
-	std::cout<<"g : "<<image.cols<<std::endl;
-	std::cout<<"b : "<<image.rows<<std::endl;
+	//extraction des pixels verts
+	for(int i = 0; i<lignes; i++)
+	{
+		for(int j = 0; j < colonnes; j++)
+		{
+			if (!(image.data[i*colonnes*3+j*3+0] == 0 && image.data[i*colonnes*3+j*3+1] == 100 && image.data[i*colonnes*3+j*3+2] == 0))
+			{
+				if (j>xmax)
+					xmax = j;
+				if (j<xmin)
+					xmin = j;
+					
+				if (i>ymax)
+					ymax = i;
+				if (i<ymin)
+					ymin = i;
+			}
+		}
+	}
+	
+	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
+	std::cout<<"ymin : "<<ymin<<" ymax : "<<ymax<<std::endl;
+	
+	pixel p1 (xmin, ymin);
+	pixel p2 (xmax, ymax);
+	Bloc pBloc (p1, p2);
+	
+	blocs.push_back(&pBloc);
+	
+	pBloc.split(blocs, image);
+	
+//	for(int i = ymin; i<ymax; i++)
+//	{
+//		for(int j = xmin; j < xmax; j++)
+//		{
+//			image.data[i*colonnes*3+j*3+1] = 255;
+//		}
+//	}
+	
 }
 
 

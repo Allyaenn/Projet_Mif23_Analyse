@@ -22,20 +22,24 @@ struct pixel {
 
 class Bloc{
 
-	private :
+	public : 
 		 pixel p_hg;
 		 pixel p_bd;
 		 int nb_pixels;
 		 double valeur;
 		 std::list<Bloc*> voisins;
 	
-	public : 
+	
 	
 		Bloc();
 		
 		Bloc(pixel hg, pixel bd, std::list<Bloc*> v);
 		
 		Bloc(pixel hg, pixel bd);
+		
+		bool operator==(const Bloc & b);
+		
+		bool estVoisin(const Bloc & b);
 		
 		//calcule la valeur (variance) associée à la région selon l'image passée en paramètres
 		//double calcule_valeur(Mat image);

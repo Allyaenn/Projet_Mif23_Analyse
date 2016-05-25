@@ -485,14 +485,16 @@ void splitAndMerge(Mat & image)
 	
 	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
 	std::cout<<"ymin : "<<ymin<<" ymax : "<<ymax<<std::endl;
+
+	blocs.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
 	
-	pixel p1 (xmin, ymin);
-	pixel p2 (xmax, ymax);
-	Bloc pBloc (p1, p2);
+	blocs.front()->split(blocs, image);
 	
-	blocs.push_back(&pBloc);
-	
-	pBloc.split(blocs, image);
+	//affichage du résultat du split
+	for(auto it = blocs.begin(); it != blocs.end(); it++)
+	{
+		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
+	}
 	
 //	for(int i = ymin; i<ymax; i++)
 //	{

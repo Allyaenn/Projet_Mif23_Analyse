@@ -65,7 +65,7 @@ int main(int argc, char ** argv){
     vcP >> frame;
 
     namedWindow("Perso", 1);
-	namedWindow("Lisse", 1);
+	//namedWindow("Lisse", 1);
 
 	spatialSmoothingGaussColor(background, 1);
     char c;
@@ -79,14 +79,15 @@ int main(int argc, char ** argv){
         perso = extractForegroundColor(background, frame);
         //perso = frame;
         imshow("Perso", perso);
-		lisse = lissageCouleur(perso, 4, 18);
-		imshow("Lisse", lisse);
-        //end = steady_clock::now();
-        //std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
+		//lisse = lissageCouleur(perso, 4, 18);
+		//imshow("Lisse", lisse);
+        end = steady_clock::now();
+        std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);
         vcP >> frame;
     }
 
+	//lisse = lissageCouleur(perso, 4, 18);
     splitAndMerge(perso);
     char d;
     d = (char)waitKey(1);

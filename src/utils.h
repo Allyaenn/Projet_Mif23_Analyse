@@ -6,11 +6,14 @@
 #include <iostream>
 #include <cmath>
 #include <list>
+#include <ctime>
+#include <chrono>
 
 #include "Bloc_Region.h"
 
 using namespace cv;
 using namespace std;
+using namespace chrono;
 
 /**
  * Usage of the program
@@ -60,7 +63,7 @@ Mat temporalSmoothing(String filename);
 * Segementation de l'image par la méthode Split and Merge
 * Le critère de segmentation/fusion se base sur la couleur
 */
-void splitAndMerge(Mat image);
+void splitAndMerge(Mat & image);
 
 /**
  * Lissage par rapport aux n voisins

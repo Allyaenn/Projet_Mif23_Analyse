@@ -27,7 +27,9 @@ bool Bloc::estVoisin(const Bloc & b){
 void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 
 	int size = (p_bd.x - p_hg.x)*(p_bd.y-p_hg.y);
-	std::cout<<"SIZE : "<<size<<std::endl;
+//	std::cout<<"pix_hg : "<<p_hg.x<<" - "<<p_hg.y<<std::endl;
+//	std::cout<<"pix_bd : "<<p_bd.x<<" - "<<p_bd.y<<std::endl;
+//	std::cout<<"SIZE : "<<size<<std::endl;
 	if(size>10)
 	{
 		std::cout<<"I'm in"<<std::endl;
@@ -38,16 +40,18 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 		sum0 = sum1 = sum2 = 0;
 		double var0, var1, var2;
 		var0 = var1 = var2 = 0;
-		int lignes = p_bd.y - p_hg.y;
-		int colonnes = p_bd.x - p_hg.x;
+		int lignes = image.rows;
+		int colonnes = image.cols;
+		
 	
 		for (int i = p_hg.y; i < p_bd.y; i++)
 		{
 			for (int j = p_hg.x; j < p_bd.x; j++)
 			{
-				if (!(image.data[i*colonnes*3+j*3+0] == 0 && image.data[i*colonnes*3+j*3+1] == 100 && image.data[i*colonnes*3+j*3+2] == 0))
+				if (!(image.data[i*colonnes*3+j*3+0] == 255 && image.data[i*colonnes*3+j*3+1] == 255 && image.data[i*colonnes*3+j*3+2] == 255))
 				{
 					n++;
+					//std::cout<<"J'ai trouvé un pixel";
 					sum0 = pow(image.data[i*colonnes*3+j*3+0],2);
 					sum1 = pow(image.data[i*colonnes*3+j*3+1],2);
 					sum2 = pow(image.data[i*colonnes*3+j*3+2],2);
@@ -69,19 +73,26 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 			var1 = (sum1/n) - pow(m1,2);
 			var2 = (sum2/n) - pow(m2,2);
 		}
+		else
+		{
+			var0 = 0;
+			var1 = 0;
+			var2 = 0;
+		}
 		
 	
-		std::cout<<"nb_pixels : "<<n<<std::endl;
-		std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
+//		std::cout<<"nb_pixels : "<<n<<std::endl;
+//		std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
 	
-		if (var0>0.001 && var1>0.001 && var2>0.001)
+		if (var0>0.01 && var1>0.01 && var2>0.01)
 		{
 			//séparation du bloc en 4
 			int nvX, nvY;
 			nvX = (p_bd.x - p_hg.x)/2;
 			nvY = (p_bd.y - p_hg.y)/2;
-			std::cout<<"nvX : "<<nvX<<" - nvY : "<<nvY<<std::endl;
-		
+//			std::cout<<"nvX : "<<nvX<<" - nvY : "<<nvY<<std::endl;
+//			std::cout<<std::endl;
+			
 			Bloc* bloc1  = new Bloc(pixel(p_hg.x, p_hg.y), pixel(nvX+p_hg.x, nvY+p_hg.y)); //OK
 			
 			Bloc* bloc2  = new Bloc(pixel(nvX+p_hg.x, p_hg.y), pixel(p_bd.x, nvY+p_hg.y));
@@ -143,10 +154,10 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 			
 			
 			//on split les nouveau blocs
-//			bloc1->split(blocs, image);
-//			bloc2->split(blocs, image);
-//			bloc3->split(blocs, image);
-//			bloc4->split(blocs, image);
+			bloc1->split(blocs, image);
+			bloc2->split(blocs, image);
+			bloc3->split(blocs, image);
+			bloc4->split(blocs, image);
 			
 		
 		}

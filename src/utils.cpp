@@ -330,7 +330,7 @@ Mat extractForegroundColor(Mat background, Mat frame)
                 }
                 else{
 
-                    res.at<Vec3b>(i,j) = Vec3b(0,100,0);
+                    res.at<Vec3b>(i,j) = Vec3b(255,255,255);
                 }
             }
         }
@@ -423,6 +423,8 @@ Mat temporalSmoothing(String filename){
 
 void splitAndMerge(Mat & image)
 {
+	steady_clock::time_point start, end;
+	start = steady_clock::now();
 	std::list<Bloc*> blocs;
 	int lignes = image.rows;
 	int colonnes = image.cols;
@@ -437,7 +439,7 @@ void splitAndMerge(Mat & image)
 	{
 		for(int j = 0; j < colonnes; j++)
 		{
-			if (!(image.data[i*colonnes*3+j*3+0] == 0 && image.data[i*colonnes*3+j*3+1] == 100 && image.data[i*colonnes*3+j*3+2] == 0))
+			if (!(image.data[i*colonnes*3+j*3+0] == 255 && image.data[i*colonnes*3+j*3+1] == 255 && image.data[i*colonnes*3+j*3+2] == 255))
 			{
 				if (j>xmax)
 					xmax = j;
@@ -465,6 +467,9 @@ void splitAndMerge(Mat & image)
 		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
 	}
 	
+	end = steady_clock::now();
+	 std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
+	
 //	for(int i = ymin; i<ymax; i++)
 //	{
 //		for(int j = xmin; j < xmax; j++)
@@ -486,12 +491,12 @@ Mat lissageCouleur(Mat image, int nbrVoisin, int requis){
 
 	for(int x = nbrVoisin; x < image.rows - 1 - nbrVoisin; x++){
 		for(int y = nbrVoisin; y < image.cols - 1 - nbrVoisin; y++){
-			if(retour.at<Vec3b>(x,y) != Vec3b(100,100,100)){
+			if(retour.at<Vec3b>(x,y) != Vec3b(255, 255, 255)){
 
 				count = 0;
 				for(int i = -1 * nbrVoisin; i < nbrVoisin + 1; i++){
 					for(int j = -1 * nbrVoisin; j < nbrVoisin + 1; j++){
-						if(retour.at<Vec3b>(x + i,y + j) != Vec3b(100,100,100))
+						if(retour.at<Vec3b>(x + i,y + j) != Vec3b(255, 255, 255))
 							count++;
 						if(count > requis)
 							break;
@@ -501,7 +506,7 @@ Mat lissageCouleur(Mat image, int nbrVoisin, int requis){
 				}
 				count--;
 				if(count < requis){
-					retour.at<Vec3b>(x,y) = Vec3b(100,100,100);
+					retour.at<Vec3b>(x,y) = Vec3b(255, 255, 255);
 				}
 			}
 		}

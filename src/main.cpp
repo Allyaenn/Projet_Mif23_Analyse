@@ -8,23 +8,21 @@
  * Step 2 : Body part Segmentation
  *
 */
-#include "utils.h"
 #include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <string.h>
+#include <cstring>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <list>
 #include <ctime>
 #include <chrono>
 
-
+#include "utils.h"
 
 using namespace cv;
 using namespace std;
-
 using namespace chrono;
 /**
  * Main Function
@@ -50,22 +48,28 @@ int main(int argc, char ** argv){
 	/** Image actuelle*/
 	Mat frame;
 	Mat frame_NB;
-	/** Image de fond*/
-    Mat background = temporalSmoothing(filename_bg);
-    Mat bg_NB;
+	/** Image de fond lissées temporellement*/
+    Mat background = temporalSmoothingColor(filename_bg);
+    Mat bg_NB = temporalSmoothing(filename_bg);
+    
+    /**Image de  fond non lissées*/
+    Mat background2;
+    Mat bg_NB2;
     /** Image extraite*/
     Mat perso;
+    Mat perso_non_lissee;
 	Mat lisse;
 	/** Video*/
     VideoCapture vc = VideoCapture(filename_bg);
-    //vc >> background;
-    cvtColor(background, bg_NB, CV_BGR2GRAY);
+    vc >> background2;
+    cvtColor(background2, bg_NB2, CV_BGR2GRAY);
 
     VideoCapture vcP = VideoCapture(filename_ps);
     vcP >> frame;
 
-    namedWindow("Perso", 1);
-	//namedWindow("Lisse", 1);
+//    namedWindow("Perso", 1);
+//	namedWindow("Background", 1);
+//	namedWindow("Background_non_lissée", 1);
 
 	spatialSmoothingGaussColor(background, 1);
     char c;
@@ -74,11 +78,17 @@ int main(int argc, char ** argv){
     while(c != 'q' && !frame.empty())
     {
     	start = steady_clock::now();
-    	cvtColor(frame, frame_NB, CV_BGR2GRAY);
+//    	cvtColor(frame, frame_NB, CV_BGR2GRAY);
+//    	perso = frame_NB;
         spatialSmoothingGaussColor(frame, 1);
+       //	spatialSmoothingGauss(frame_NB,1);
         perso = extractForegroundColor(background, frame);
+        //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
+        //perso = frame_NB;
         imshow("Perso", perso);
+//        imshow("Background", background);
+//        imshow("Background_non_lissée", background2);
 		//lisse = lissageCouleur(perso, 4, 18);
 		//imshow("Lisse", lisse);
         end = steady_clock::now();

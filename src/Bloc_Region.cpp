@@ -7,6 +7,11 @@ Bloc::Bloc(pixel hg, pixel bd, std::list<Bloc*> v) : p_hg(hg), p_bd(bd),voisins(
 
 Bloc::Bloc(pixel hg, pixel bd) : p_hg(hg), p_bd(bd){}
 
+const std::list<Bloc*> & Bloc::getVoisins()
+{
+	return voisins;
+}
+
 bool Bloc::operator==(const Bloc & b)
 {
 	if (p_hg.x == b.p_hg.x && p_hg.y == b.p_hg.y && p_bd.x == b.p_bd.x && p_bd.y == b.p_bd.y)
@@ -19,8 +24,50 @@ bool Bloc::operator==(const Bloc & b)
 
 bool Bloc::estVoisin(const Bloc & b){
 
+//	std::cout<<"this : "<<std::endl;
+//	std::cout<<"Xmin : "<<p_hg.x<<" - Ymin : "<<p_hg.y<<std::endl;
+//	std::cout<<"Xmax : "<<p_bd.x<<" - Ymax : "<<p_bd.y<<std::endl;
+//	std::cout<<"b : "<<std::endl;
+//	std::cout<<"Xmin : "<<b.p_hg.x<<" - Ymin : "<<b.p_hg.y<<std::endl;
+//	std::cout<<"Xmax : "<<b.p_bd.x<<" - Ymax : "<<b.p_bd.y<<std::endl;
 	
-	return false;
+	if (p_hg.x == b.p_bd.x+1)
+	{
+		//potentiel voisin gauche
+		if (b.p_hg.y >= p_hg.y-1 && b.p_hg.y <= p_bd.y+1 || b.p_bd.y >= p_hg.y-1 && b.p_bd.y <= p_bd.y+1)
+			return true;
+		else
+			return false;
+	}
+	else if (p_bd.x == b.p_hg.x-1)
+	{
+		//potentiel voisin droite
+		if (b.p_hg.y >= p_hg.y-1 && b.p_hg.y <= p_bd.y+1 || b.p_bd.y >= p_hg.y-1 && b.p_bd.y <= p_bd.y+1)
+		{
+			//std::cout<<"VOISIN DROITE"<<std::endl;
+			return true;
+		}
+		else
+			return false;
+	}
+	else if (p_hg.y == b.p_bd.y-1)
+	{
+		//potentiel voisin haut
+		if (b.p_hg.x >= p_hg.x-1 && b.p_hg.x <= p_bd.x+1 || b.p_bd.x >= p_hg.x-1 && b.p_bd.x <= p_bd.x+1)
+			return true;
+		else
+			return false;
+	}
+	else if (p_bd.y == b.p_hg.y+1)
+	{
+		//potentiel voisin bas
+		if (b.p_hg.x >= p_hg.x-1 && b.p_hg.x <= p_bd.x+1 || b.p_bd.x >= p_hg.x-1 && b.p_bd.x <= p_bd.x+1)
+			return true;
+		else
+			return false;
+	}
+	else
+		return false; //les deux blocs ne sont pas voisins
 
 }
 		
@@ -30,9 +77,9 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 //	std::cout<<"pix_hg : "<<p_hg.x<<" - "<<p_hg.y<<std::endl;
 //	std::cout<<"pix_bd : "<<p_bd.x<<" - "<<p_bd.y<<std::endl;
 //	std::cout<<"SIZE : "<<size<<std::endl;
-	if(size>10)
+	if(size>100)
 	{
-		std::cout<<"I'm in"<<std::endl;
+		//std::cout<<"I'm in"<<std::endl;
 		int n = 0;
 		int m0,m1,m2;
 		double sum1,sum2,sum0;
@@ -48,17 +95,17 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 		{
 			for (int j = p_hg.x; j < p_bd.x; j++)
 			{
-				if (!(image.data[i*colonnes*3+j*3+0] == 255 && image.data[i*colonnes*3+j*3+1] == 255 && image.data[i*colonnes*3+j*3+2] == 255))
+				if (!(image.data[i*colonnes*3+j*3+0] == BLUE && image.data[i*colonnes*3+j*3+1] == GREEN && image.data[i*colonnes*3+j*3+2] == RED))
 				{
 					n++;
 					//std::cout<<"J'ai trouvé un pixel";
-					sum0 = pow(image.data[i*colonnes*3+j*3+0],2);
-					sum1 = pow(image.data[i*colonnes*3+j*3+1],2);
-					sum2 = pow(image.data[i*colonnes*3+j*3+2],2);
+					sum0 += pow(image.data[i*colonnes*3+j*3+0],2);
+					sum1 += pow(image.data[i*colonnes*3+j*3+1],2);
+					sum2 += pow(image.data[i*colonnes*3+j*3+2],2);
 				
-					m0 = image.data[i*colonnes*3+j*3+0];
-					m1 = image.data[i*colonnes*3+j*3+1];
-					m2 = image.data[i*colonnes*3+j*3+2];
+					m0 += image.data[i*colonnes*3+j*3+0];
+					m1 += image.data[i*colonnes*3+j*3+1];
+					m2 += image.data[i*colonnes*3+j*3+2];
 				}
 			}
 		}
@@ -82,9 +129,9 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 		
 	
 //		std::cout<<"nb_pixels : "<<n<<std::endl;
-//		std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
+		//std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
 	
-		if (var0>0.01 && var1>0.01 && var2>0.01)
+		if (var0>100 || var1>100 || var2>100) // a faire varier
 		{
 			//séparation du bloc en 4
 			int nvX, nvY;
@@ -95,27 +142,49 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 			
 			Bloc* bloc1  = new Bloc(pixel(p_hg.x, p_hg.y), pixel(nvX+p_hg.x, nvY+p_hg.y)); //OK
 			
-			Bloc* bloc2  = new Bloc(pixel(nvX+p_hg.x, p_hg.y), pixel(p_bd.x, nvY+p_hg.y));
+			Bloc* bloc2  = new Bloc(pixel(nvX+p_hg.x+1, p_hg.y), pixel(p_bd.x, nvY+p_hg.y));
 			
-			Bloc* bloc3  = new Bloc(pixel(p_hg.x, nvY+p_hg.y), pixel(nvX+p_hg.x, p_bd.y));
+			Bloc* bloc3  = new Bloc(pixel(p_hg.x, nvY+p_hg.y+1), pixel(nvX+p_hg.x, p_bd.y));
 			
-			Bloc* bloc4  = new Bloc(pixel(nvX+p_hg.x, nvY+p_hg.y), pixel(p_bd.x, p_bd.y)); //OK
+			Bloc* bloc4  = new Bloc(pixel(nvX+p_hg.x+1, nvY+p_hg.y+1), pixel(p_bd.x, p_bd.y)); //OK
 			
 			//répartion des vosins du bloc d'origine
 			
 			for (auto it = voisins.begin(); it != voisins.end(); it++)
 			{
-				if (bloc1->estVoisin(**it))
+				//supression du bloc principal en tant que voisin chez ses propres  voisins
+				for (auto it2 = (*it)->voisins.begin(); it2 != (*it)->voisins.end(); it2++)
+				{
+					if (*this == **it2)
+					{
+						(*it)->voisins.erase(it2);
+						break;
+					}
+				}	
+				
+				if (bloc1->estVoisin(**it)){
+					//std::cout<<"Le bloc 1 a un voisin"<<std::endl;
 					bloc1->voisins.push_back(*it);
+					(*it)->voisins.push_back(bloc1);
+				}
 				
-				if (bloc2->estVoisin(**it))
+				if (bloc2->estVoisin(**it)){
+					//std::cout<<"Le bloc 2 a un voisin"<<std::endl;
 					bloc2->voisins.push_back(*it);
+					(*it)->voisins.push_back(bloc2);
+				}
 				
-				if (bloc3->estVoisin(**it))
+				if (bloc3->estVoisin(**it)){
+					//std::cout<<"Le bloc 3 a un voisin"<<std::endl;
 					bloc3->voisins.push_back(*it);
+					(*it)->voisins.push_back(bloc3);
+				}
 				
-				if (bloc3->estVoisin(**it))
-					bloc3->voisins.push_back(*it);
+				if (bloc4->estVoisin(**it)){
+					//std::cout<<"Le bloc 4 a un voisin"<<std::endl;
+					bloc4->voisins.push_back(*it);
+					(*it)->voisins.push_back(bloc4);
+				}
 			}
 			
 			//insertion des nouveaux blocs dans les listes de voisins

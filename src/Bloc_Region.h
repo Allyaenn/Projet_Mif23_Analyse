@@ -9,8 +9,14 @@
 #include <iostream>
 #include <cmath>
 #include <list>
+#include <ctime>
+#include <chrono>
+
+#include "constantes.h"
 
 using namespace cv;
+using namespace std;
+using namespace chrono;
 
 struct pixel {
 	int x;
@@ -23,11 +29,11 @@ struct pixel {
 class Bloc{
 
 	public : 
-		 pixel p_hg;
-		 pixel p_bd;
-		 int nb_pixels;
-		 double valeur;
-		 std::list<Bloc*> voisins;
+		 pixel p_hg; // représente le pixel en haut a gauche du bloc (comportant xmin et ymin)
+		 pixel p_bd; // représente le pixel en bas a droite du bloc (comportant xmax et ymax)
+		 int nb_pixels; // donne le nombre de pixels stockés dans la région (les pixels de l'arrière plan ne sont pas pris en compte)
+		 double valeur; // la variance
+		 std::list<Bloc*> voisins; // les voisins
 	
 	
 	
@@ -36,6 +42,8 @@ class Bloc{
 		Bloc(pixel hg, pixel bd, std::list<Bloc*> v);
 		
 		Bloc(pixel hg, pixel bd);
+		
+		const std::list<Bloc*> & getVoisins();
 		
 		bool operator==(const Bloc & b);
 		

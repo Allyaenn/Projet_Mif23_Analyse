@@ -15,7 +15,7 @@ void wrongFormat(){
 }
 
 /**
- * Calcul d'un lissage spatial
+ * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = moyenne*/
 Mat spatialSmoothingAvg(Mat image, double lambda)
 {
@@ -24,11 +24,13 @@ Mat spatialSmoothingAvg(Mat image, double lambda)
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int res0, res1, res2; //des int pour eviter le dépassement de capacité
-	int coordMin = -lambda/2;
-	int coordMax = lambda/2;
-	for(int i = 1; i<lignes-1; i++)
+	int lambdasur2 = lambda/2;
+	int coordMin = -lambdasur2;
+	int coordMax = lambdasur2;
+	
+	for(int i = lambdasur2; i<lignes-lambdasur2; i++)
 	{
-		for(int j = 1; j<colonnes-1; j++)
+		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
 			//calcul de la convolution pour chaque composante couleur
 			res0 = res1 = res2 = 0;
@@ -45,17 +47,20 @@ Mat spatialSmoothingAvg(Mat image, double lambda)
 	return copie;
 }
 
+/**
+ * Calcul d'un lissage spatial pour une image en couleurs
+  noyau = moyenne*/
 Mat spatialSmoothingAvgColor(Mat image, double lambda)
 {
 	Mat copie = image;
-	
 	double h = 1.0/(pow(lambda,2));
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int res0, res1, res2;
 	int lambdasur2 = lambda/2;
-	int coordMin = -lambda/2;
-	int coordMax = lambda/2;
+	int coordMin = -lambdasur2;
+	int coordMax = lambdasur2;
+	
 	for(int i = lambdasur2; i<lignes-lambdasur2; i++)
 	{
 		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
@@ -81,9 +86,9 @@ Mat spatialSmoothingAvgColor(Mat image, double lambda)
 
 
 /**
- * Calcul d'un lissage spatial
+ * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = Gaussienne*/
-Mat spatialSmoothingGauss(Mat image, double sigma)
+Mat spatialSmoothingGauss(const Mat image, double sigma)
 {
 	Mat copie = image;
 	int lignes = image.rows;
@@ -123,7 +128,9 @@ Mat spatialSmoothingGauss(Mat image, double sigma)
 	return copie;	
 }
 
-//BGR
+/**
+ * Calcul d'un lissage spatial pour une image en couleur
+  noyau = Gaussienne*/
 Mat spatialSmoothingGaussColor(Mat image, double sigma)
 {
 	Mat copie = image;
@@ -170,11 +177,9 @@ Mat spatialSmoothingGaussColor(Mat image, double sigma)
 	return copie;	
 }
 
-//moyenne -> on a un carré donc tant pis pour le sinon !
-
 /**
- * Calcul d'un lissage spatial
-  noyau = fonction exponentielle*/
+ * Calcul d'un lissage spatial pour une image en niveau de gris
+  noyau = Exponentielle*/
 Mat spatialSmoothingExp(Mat image, double gamma)
 {
 	Mat copie = image;
@@ -213,6 +218,9 @@ Mat spatialSmoothingExp(Mat image, double gamma)
 	return copie;	
 }
 
+/**
+ * Calcul d'un lissage spatial pour une image en niveau de gris
+  noyau = Exponentielle*/
 Mat spatialSmoothingExpColor(Mat image, double gamma)
 {
 	Mat copie = image;
@@ -242,13 +250,12 @@ Mat spatialSmoothingExpColor(Mat image, double gamma)
 					for (int v = -1; v < 2; v++)
 					{	
 						h = refu_v[(u+1)*3+(v+1)];
-						//res += h*(image.data[(i+u)*colonnes+(j+v)]);
 						res0 += h * image.data[(i+u)*colonnes*3+(j+v)*3+0];
 						res1 += h * image.data[(i+u)*colonnes*3+(j+v)*3+1];
 						res2 += h * image.data[(i+u)*colonnes*3+(j+v)*3+2];
 					}
 				} 
-				//copie.data[i*colonnes+j] = (unsigned char)(res);
+				
 				copie.data[i*colonnes*3+j*3+0] = (unsigned char) res0;
 				copie.data[i*colonnes*3+j*3+1] = (unsigned char) res1;
 				copie.data[i*colonnes*3+j*3+2] = (unsigned char) res2;
@@ -282,55 +289,41 @@ bool isScreenEge(int coordX, int coordY, int maxX, int maxY, double distance){
 }
 
 /**
- * Renvoi vrai si la différence entre les couleurs des deux pixels est supérieure au seuil
- */
-bool pixelColorDifference(Vec3b pixA, Vec3b pixB, double seuil){
-
-	if(abs(pixA[0] - pixB[0]) > seuil||
-			abs(pixA[1] - pixB[1]) > seuil ||
-			abs(pixA[2] - pixB[2]) >seuil){
-		return true;
-	}
-	return false;
-
-}
-
-
-/**
  * Extrait les éléments mouvants de @frame
  * en comparant par rapport à  l'image de fond passée dans l'argument @Background
  * @backgound Matrice contenant l'image de fond
  * @frame Matrice contenant l'image complete
  * @return les éléments mouvants extraits de frame
  */
-Mat extractForegroundColor(Mat background, Mat frame)
-{
+Mat extractForegroundColor(Mat background, Mat frame){
     Mat res;
-    int seuil = 16;
+    int seuil = 14;
+    int lignes = frame.rows;
+    int colonnes = frame.cols;
 	
     /*Vérification de la correspondance des dimensions*/
-	if (background.rows == frame.rows && background.cols == frame.cols)
-	{
+	if (background.rows == lignes && background.cols == colonnes){
+        
         res = Mat(frame.size(), frame.type());
 
         /*comparaison de l'image avec l'arrière-plan
         et construction d'une image où les différences apparaissent*/
-        for (int i = 0; i<frame.rows; i++)
-        {
-            for (int j = 0; j<frame.cols; j++)
-            {
+        for (int i = 0; i<lignes; i++){
+            for (int j = 0; j<colonnes; j++){
+            
+            	if(abs(frame.data[i*colonnes*3+j*3+0] - background.data[i*colonnes*3+j*3+0]) > seuil
+            	|| abs(frame.data[i*colonnes*3+j*3+1] - background.data[i*colonnes*3+j*3+1]) > seuil
+            	|| abs(frame.data[i*colonnes*3+j*3+2] - background.data[i*colonnes*3+j*3+2]) > seuil){
 
-				if(pixelColorDifference(frame.at<Vec3b>(i,j), 
-							background.at<Vec3b>(i,j), seuil))
-				{
-
-                    //res.at<Vec3b>(i,j) = Vec3b(0,0,255);
-                    res.at<Vec3b>(i,j) = frame.at<Vec3b>(i,j);
-
-                }
+                    res.data[i*colonnes*3+j*3+0] = frame.data[i*colonnes*3+j*3+0];
+                    res.data[i*colonnes*3+j*3+1] = frame.data[i*colonnes*3+j*3+1];
+                    res.data[i*colonnes*3+j*3+2] = frame.data[i*colonnes*3+j*3+2];
+				}
                 else{
-
-                    res.at<Vec3b>(i,j) = Vec3b(255,255,255);
+                	res.data[i*colonnes*3+j*3+0] = BLUE;
+                    res.data[i*colonnes*3+j*3+1] = GREEN;
+                    res.data[i*colonnes*3+j*3+2] = RED;
+                    //opencv fonctionne en BGR et non en RGB
                 }
             }
         }
@@ -345,28 +338,28 @@ Mat extractForeground(Mat background, Mat frame)
 {
     Mat res;
     int seuil = 25;
+    int lignes = frame.rows;
+    int colonnes = frame.cols;
 	
     /*Vérification de la correspondance des dimensions*/
-	if (background.rows == frame.rows && background.cols == frame.cols)
+	if (background.rows == lignes && background.cols == colonnes)
 	{
         res = Mat(frame.size(), frame.type());
 
         /*comparaison de l'image avec l'arrière-plan
         et construction d'une image où les différences apparaissent*/
-        for (int i = 0; i<frame.rows; i++)
+        for (int i = 0; i<lignes; i++)
         {
-            for (int j = 0; j<frame.cols; j++)
+            for (int j = 0; j<colonnes; j++)
             {
 
-                if(abs(frame.at<unsigned char>(i,j) - background.at<unsigned char>(i,j)) > seuil){
+                if(abs(frame.data[i*colonnes+j] - background.data[i*colonnes+j]) > seuil){
 
-                    //res.at<Vec3b>(i,j) = Vec3b(0,0,255);
-                    res.at<unsigned char>(i,j) = frame.at<unsigned char>(i,j);
+                    res.data[i*colonnes+j] = frame.data[i*colonnes+j];
 
                 }
-                else{
-
-                    res.at<unsigned char>(i,j) = 100;
+                else{	
+                    res.data[i*colonnes+j] = GRAY;
                 }
             }
         }
@@ -378,9 +371,9 @@ Mat extractForeground(Mat background, Mat frame)
 }
 
 /**
- * Lissage temporel
+ * Lissage temporel pour image couleur
  */
-Mat temporalSmoothing(String filename){
+Mat temporalSmoothingColor(String filename){
 
     /*Résultat à renvoyer*/
     Mat background;
@@ -388,31 +381,36 @@ Mat temporalSmoothing(String filename){
     Mat stockage[10];
     /** Video*/
     VideoCapture vc = VideoCapture(filename);
-    double h = 0.1;
 
     /*Récupération des dix premières images*/
     for(int i = 0; i< 10; i++){
         vc >> stockage[i];
     }
     background = Mat(stockage[0].size(), stockage[0].type());
-
+	
+	double h = 0.1;
+    double res0, res1, res2;
+    int lignes = background.rows;
+    int colonnes = background.cols;
+	
     /*
      * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
      * respectifs de chaque image
      */
-    for(int x = 0; x < background.rows; x++){
-        for(int y = 0; y < background.cols; y ++){
-            for(int k = 0; k < 3; k++)
-            {
-                //calcul de la convolution pour chaque composante couleur
-                int res = 0;
-                for (int u = 0; u < 10; u++)
-                {
+    for(int x = 0; x < lignes; x++){
+        for(int y = 0; y < colonnes; y ++){
 
-                    res = res + (h*(stockage[u].at<Vec3b>(x, y)[k]));
-                }
-                background.at<Vec3b>(x,y)[k] = res;
+            res0 = res1 = res2 = 0;
+            for (int u = 0; u < 10; u++)
+            {
+				//res = res + (h*(stockage[u].at<Vec3b>(x, y)[k]));
+				res0 += stockage[u].data[x*colonnes*3+y*3+0];
+				res1 += stockage[u].data[x*colonnes*3+y*3+1];
+				res2 += stockage[u].data[x*colonnes*3+y*3+2];
             }
+            background.data[x*colonnes*3+y*3+0] = (unsigned char)(res0 * h);
+            background.data[x*colonnes*3+y*3+1] = (unsigned char)(res1 * h);
+            background.data[x*colonnes*3+y*3+2] = (unsigned char)(res2 * h);
 
         }
     }
@@ -421,7 +419,55 @@ Mat temporalSmoothing(String filename){
     return background;
 }
 
-void splitAndMerge(Mat & image)
+/**
+ * Lissage temporel pour image en niveau de gris
+ */
+Mat temporalSmoothing(String filename){
+
+    /*Résultat à renvoyer*/
+    Mat background;
+    /*Ensemble des 10 premières frames de la vidéos*/
+    Mat stockage[10];
+    
+    Mat temp;
+    /** Video*/
+    VideoCapture vc = VideoCapture(filename);
+
+    /*Récupération des dix premières images*/
+    for(int i = 0; i< 10; i++){
+        vc >> temp;
+        cvtColor(temp, stockage[i], CV_BGR2GRAY); //passage de couleur en niveau de gris
+    }
+    background = Mat(stockage[0].size(), stockage[0].type());
+	
+	double h = 0.1;
+    double res;
+    int lignes = background.rows;
+    int colonnes = background.cols;
+	
+    /*
+     * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
+     * respectifs de chaque image
+     */
+    for(int x = 0; x < lignes; x++){
+        for(int y = 0; y < colonnes; y ++){
+
+            res = 0;
+            for (int u = 0; u < 10; u++)
+            {
+				res += stockage[u].data[x*colonnes+y];
+            }
+            background.data[x*colonnes+y] = (unsigned char)(res * h);
+
+        }
+    }
+    vc.release();
+    //spatialSmoothingAvgColor(background, 1);
+    return background;
+}
+
+//http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
+void splitAndMerge(const Mat & image)
 {
 	steady_clock::time_point start, end;
 	start = steady_clock::now();
@@ -439,7 +485,7 @@ void splitAndMerge(Mat & image)
 	{
 		for(int j = 0; j < colonnes; j++)
 		{
-			if (!(image.data[i*colonnes*3+j*3+0] == 255 && image.data[i*colonnes*3+j*3+1] == 255 && image.data[i*colonnes*3+j*3+2] == 255))
+			if (!(image.data[i*colonnes*3+j*3+0] == BLUE && image.data[i*colonnes*3+j*3+1] == GREEN && image.data[i*colonnes*3+j*3+2] == RED))
 			{
 				if (j>xmax)
 					xmax = j;
@@ -450,6 +496,11 @@ void splitAndMerge(Mat & image)
 					ymax = i;
 				if (i<ymin)
 					ymin = i;
+				
+				//on fait la modification préalable
+				image.data[i*colonnes*3+j*3+0] = pow(image.data[i*colonnes*3+j*3+0],2);
+				image.data[i*colonnes*3+j*3+1] = pow(image.data[i*colonnes*3+j*3+1],2);
+				image.data[i*colonnes*3+j*3+2] = pow(image.data[i*colonnes*3+j*3+2],2);
 			}
 		}
 	}
@@ -462,6 +513,15 @@ void splitAndMerge(Mat & image)
 	blocs.front()->split(blocs, image);
 	
 	//affichage du résultat du split
+	
+	auto itBloc = blocs.begin();
+	itBloc++; itBloc++;itBloc++;itBloc++;
+	rectangle(image, Point((*itBloc)->p_hg.x,(*itBloc)->p_hg.y), Point ((*itBloc)->p_bd.x,(*itBloc)->p_bd.y), CV_RGB(255,0,0),CV_FILLED);
+	for(auto it = (*itBloc)->getVoisins().begin(); it != (*itBloc)->getVoisins().end(); it++)
+	{
+		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), CV_RGB(0,0,255),CV_FILLED);
+	}
+	
 	for(auto it = blocs.begin(); it != blocs.end(); it++)
 	{
 		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
@@ -479,7 +539,6 @@ void splitAndMerge(Mat & image)
 //	}
 	
 }
-
 
 /**
  * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction

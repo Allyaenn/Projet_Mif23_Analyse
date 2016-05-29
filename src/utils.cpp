@@ -547,14 +547,29 @@ Mat lissageCouleur(Mat image, int nbrVoisin, int requis){
 	
 	Mat retour(image.size(), image.type());
 	int count;
+	int iMax, jMax, iMin, jMin;
 
-	for(int x = nbrVoisin; x < image.rows - 1 - nbrVoisin; x++){
-		for(int y = nbrVoisin; y < image.cols - 1 - nbrVoisin; y++){
+	for(int x = 0; x < image.rows - 1; x++){
+		for(int y = 0; y < image.cols - 1; y++){
 			if(retour.at<Vec3b>(x,y) != Vec3b(255, 255, 255)){
 
 				count = 0;
-				for(int i = -1 * nbrVoisin; i < nbrVoisin + 1; i++){
-					for(int j = -1 * nbrVoisin; j < nbrVoisin + 1; j++){
+				iMax = x + nbrVoisin;
+				iMin = x - nbrVoisin;
+				jMax = y + nbrVoisin;
+				jMin = y - nbrVoisin;
+
+				if(x -  nbrVoisin < 0)
+					iMin = nbrVoisin - x - nbrVoisin;
+				if(x + nbrVoisin > image.rows - 1)
+					iMax = image.rows -1 - x;
+				if(y - nbrVoisin < 0)
+					jMin = nbrVoisin - y - nbrVoisin;
+				if(y + nbrVoisin > image.cols - 1)
+					jMax = image.cols - 1 - y;
+
+				for(int i = iMin; i < iMax; i++){
+					for(int j = jMin; j < jMax; j++){
 						if(retour.at<Vec3b>(x + i,y + j) != Vec3b(255, 255, 255))
 							count++;
 						if(count > requis)

@@ -17,9 +17,9 @@ void wrongFormat(){
 /**
  * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = moyenne*/
-Mat spatialSmoothingAvg(Mat image, double lambda)
+Mat spatialSmoothingAvg(const Mat & image, double lambda)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	double h = 1.0/(pow(lambda,2));
 	int lignes = image.rows;
 	int colonnes = image.cols;
@@ -50,9 +50,9 @@ Mat spatialSmoothingAvg(Mat image, double lambda)
 /**
  * Calcul d'un lissage spatial pour une image en couleurs
   noyau = moyenne*/
-Mat spatialSmoothingAvgColor(Mat image, double lambda)
+Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	double h = 1.0/(pow(lambda,2));
 	int lignes = image.rows;
 	int colonnes = image.cols;
@@ -88,9 +88,9 @@ Mat spatialSmoothingAvgColor(Mat image, double lambda)
 /**
  * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = Gaussienne*/
-Mat spatialSmoothingGauss(const Mat image, double sigma)
+Mat spatialSmoothingGauss(const Mat & image, double sigma)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	double res;
@@ -131,9 +131,9 @@ Mat spatialSmoothingGauss(const Mat image, double sigma)
 /**
  * Calcul d'un lissage spatial pour une image en couleur
   noyau = Gaussienne*/
-Mat spatialSmoothingGaussColor(Mat image, double sigma)
+Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	double res0, res1, res2;
@@ -180,9 +180,9 @@ Mat spatialSmoothingGaussColor(Mat image, double sigma)
 /**
  * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = Exponentielle*/
-Mat spatialSmoothingExp(Mat image, double gamma)
+Mat spatialSmoothingExp(const Mat & image, double gamma)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	double res;
@@ -221,9 +221,9 @@ Mat spatialSmoothingExp(Mat image, double gamma)
 /**
  * Calcul d'un lissage spatial pour une image en niveau de gris
   noyau = Exponentielle*/
-Mat spatialSmoothingExpColor(Mat image, double gamma)
+Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 {
-	Mat copie = image;
+	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	double res0, res1, res2;
@@ -295,7 +295,7 @@ bool isScreenEge(int coordX, int coordY, int maxX, int maxY, double distance){
  * @frame Matrice contenant l'image complete
  * @return les éléments mouvants extraits de frame
  */
-Mat extractForegroundColor(Mat background, Mat frame){
+Mat extractForegroundColor(const Mat & background, const Mat & frame){
     Mat res;
     int seuil = 14;
     int lignes = frame.rows;
@@ -334,7 +334,7 @@ Mat extractForegroundColor(Mat background, Mat frame){
     return res;
 }
 
-Mat extractForeground(Mat background, Mat frame)
+Mat extractForeground(const Mat & background, const Mat & frame)
 {
     Mat res;
     int seuil = 25;
@@ -469,15 +469,17 @@ Mat temporalSmoothing(String filename){
 //http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
 void splitAndMerge(const Mat & image)
 {
+	Mat copieCarree = Mat(image.rows, image.cols, CV_64FC3,Scalar::all(0));
+	Mat copie = image.clone();
 	steady_clock::time_point start, end;
 	start = steady_clock::now();
 	std::list<Bloc*> blocs;
-	int lignes = image.rows;
-	int colonnes = image.cols;
+	int lignes = copie.rows;
+	int colonnes = copie.cols;
 	int xmin, xmax, ymin, ymax;
-	ymin = image.rows+1;
+	ymin = lignes+1;
 	ymax = -1;
-	xmin = image.cols+1;
+	xmin = colonnes+1;
 	xmax = -1;
 	
 	//extraction des pixels verts
@@ -485,7 +487,7 @@ void splitAndMerge(const Mat & image)
 	{
 		for(int j = 0; j < colonnes; j++)
 		{
-			if (!(image.data[i*colonnes*3+j*3+0] == BLUE && image.data[i*colonnes*3+j*3+1] == GREEN && image.data[i*colonnes*3+j*3+2] == RED))
+			if (!(copie.data[i*colonnes*3+j*3+0] == BLUE && copie.data[i*colonnes*3+j*3+1] == GREEN && copie.data[i*colonnes*3+j*3+2] == RED))
 			{
 				if (j>xmax)
 					xmax = j;
@@ -498,9 +500,11 @@ void splitAndMerge(const Mat & image)
 					ymin = i;
 				
 				//on fait la modification préalable
-				image.data[i*colonnes*3+j*3+0] = pow(image.data[i*colonnes*3+j*3+0],2);
-				image.data[i*colonnes*3+j*3+1] = pow(image.data[i*colonnes*3+j*3+1],2);
-				image.data[i*colonnes*3+j*3+2] = pow(image.data[i*colonnes*3+j*3+2],2);
+				copieCarree.data[i*colonnes*3+j*3+0] = (double)pow(copie.data[i*colonnes*3+j*3+0],2);
+				std::cout<<"Carré  = "<<copieCarree.data[i*colonnes*3+j*3+0]<<std::endl;
+				std::cout<<"Carré_pow  = "<<pow(copie.data[i*colonnes*3+j*3+0],2);
+				copieCarree.data[i*colonnes*3+j*3+1] = (double)pow(copie.data[i*colonnes*3+j*3+1],2);
+				copieCarree.data[i*colonnes*3+j*3+2] = (double) pow(copie.data[i*colonnes*3+j*3+2],2);
 			}
 		}
 	}
@@ -510,9 +514,11 @@ void splitAndMerge(const Mat & image)
 
 	blocs.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
 	
-	blocs.front()->split(blocs, image);
+	 cout << "M = " << endl << " " << copieCarree<< endl << endl;
 	
-	//affichage du résultat du split
+	blocs.front()->split(blocs, copie, copieCarree);
+	
+	//affichage du résultat du split (destiné à disparaitre)
 	
 	auto itBloc = blocs.begin();
 	itBloc++; itBloc++;itBloc++;itBloc++;
@@ -543,7 +549,7 @@ void splitAndMerge(const Mat & image)
 /**
  * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
  */
-Mat lissageCouleur(Mat image, int nbrVoisin, int requis){
+Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis){
 	
 	Mat retour(image.size(), image.type());
 	int count;

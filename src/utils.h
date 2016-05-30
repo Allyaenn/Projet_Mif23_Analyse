@@ -26,21 +26,21 @@ void wrongFormat();
 
 /*Calcul d'un lissage spatial 
   noyau = moyenne*/
-Mat spatialSmoothingAvg(Mat image, double lambda);
+Mat spatialSmoothingAvg(const Mat & image, double lambda);
 
-Mat spatialSmoothingAvgColor(Mat image, double lambda);
+Mat spatialSmoothingAvgColor(const Mat & image, double lambda);
 
 /*Calcul d'un lissage spatial 
   noyau = Gaussienne*/
-Mat spatialSmoothingGauss(const Mat image, double sigma);
+Mat spatialSmoothingGauss(const Mat & image, double sigma);
 
-Mat spatialSmoothingGaussColor(Mat image, double sigma);
+Mat spatialSmoothingGaussColor(const Mat & image, double sigma);
 
 /*Calcul d'un lissage spatial 
   noyau = fonction exponentielle*/
-Mat spatialSmoothingExp(cv::Mat image, double gamma);
+Mat spatialSmoothingExp(const Mat & image, double gamma);
 
-Mat spatialSmoothingExpColor(cv::Mat image, double gamma);
+Mat spatialSmoothingExpColor(const Mat & image, double gamma);
 
 /** 
  * Retourne vrai sil le pixel est situé à une certaine distance des bords de l'image
@@ -52,12 +52,12 @@ bool isScreenEdge(int coordX, int coordY, int maxX, int maxY, double distance);
 /**
 * Extraction des pixels au premier plan dans une image couleur (3 canaux)
 */
-Mat extractForegroundColor(Mat background, Mat frame);
+Mat extractForegroundColor(const Mat & background, const Mat & frame);
 
 /**
 * Extraction des pixels au premier plan dans une image en niveaux de gris (1 canal)
 */
-Mat extractForeground(Mat background, Mat frame);
+Mat extractForeground(const Mat & background, const Mat & frame);
 
 /**
  * Lissage temporel pour image couleur
@@ -78,7 +78,7 @@ void splitAndMerge(const Mat & image);
 /**
  * Lissage par rapport aux n voisins
  */
-Mat lissageCouleur(Mat image, int nbrVoisin, int requis);
+Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis);
 
 #endif
 

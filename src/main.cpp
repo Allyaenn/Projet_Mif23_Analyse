@@ -71,7 +71,7 @@ int main(int argc, char ** argv){
 //	namedWindow("Background", 1);
 //	namedWindow("Background_non_lissée", 1);
 
-	spatialSmoothingGaussColor(background, 1);
+	background = spatialSmoothingGaussColor(background, 1);
     char c;
     c = (char)waitKey(1);
     steady_clock::time_point start, end;
@@ -80,9 +80,9 @@ int main(int argc, char ** argv){
     	start = steady_clock::now();
 //    	cvtColor(frame, frame_NB, CV_BGR2GRAY);
 //    	perso = frame_NB;
-        spatialSmoothingGaussColor(frame, 1);
+        perso = spatialSmoothingGaussColor(frame, 1);
        //	spatialSmoothingGauss(frame_NB,1);
-        perso = extractForegroundColor(background, frame);
+        perso = extractForegroundColor(background, perso);
         //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
         //perso = frame_NB;

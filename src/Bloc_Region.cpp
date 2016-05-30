@@ -71,13 +71,13 @@ bool Bloc::estVoisin(const Bloc & b){
 
 }
 		
-void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
-
+void Bloc::split(std::list<Bloc*> & blocs, const Mat & image, const Mat & imageCarree){
+	std::cout<<"SPLIT"<<std::endl;
 	int size = (p_bd.x - p_hg.x)*(p_bd.y-p_hg.y);
 //	std::cout<<"pix_hg : "<<p_hg.x<<" - "<<p_hg.y<<std::endl;
 //	std::cout<<"pix_bd : "<<p_bd.x<<" - "<<p_bd.y<<std::endl;
 //	std::cout<<"SIZE : "<<size<<std::endl;
-	if(size>100)
+	if(size>25)
 	{
 		//std::cout<<"I'm in"<<std::endl;
 		int n = 0;
@@ -99,7 +99,12 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 				{
 					n++;
 					//std::cout<<"J'ai trouvé un pixel";
+//					sum0 += imageCarree.data[i*colonnes*3+j*3+0];
+//					sum1 += imageCarree.data[i*colonnes*3+j*3+1];
+//					sum2 += imageCarree.data[i*colonnes*3+j*3+2];
+					
 					sum0 += pow(image.data[i*colonnes*3+j*3+0],2);
+					std::cout<<"Carré SPLIT  = "<<pow(image.data[i*colonnes*3+j*3+0],2)<<std::endl;
 					sum1 += pow(image.data[i*colonnes*3+j*3+1],2);
 					sum2 += pow(image.data[i*colonnes*3+j*3+2],2);
 				
@@ -116,9 +121,9 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 			m1 = m1/n;
 			m2 = m2/n;
 	
-			var0 = (sum0/n) - pow(m0,2);
-			var1 = (sum1/n) - pow(m1,2);
-			var2 = (sum2/n) - pow(m2,2);
+			var0 = abs((sum0/n) - pow(m0,2));
+			var1 = abs((sum1/n) - pow(m1,2));
+			var2 = abs((sum2/n) - pow(m2,2));
 		}
 		else
 		{
@@ -128,8 +133,8 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 		}
 		
 	
-//		std::cout<<"nb_pixels : "<<n<<std::endl;
-		//std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
+		std::cout<<"nb_pixels : "<<n<<std::endl;
+		std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
 	
 		if (var0>100 || var1>100 || var2>100) // a faire varier
 		{
@@ -223,10 +228,10 @@ void Bloc::split(std::list<Bloc*> & blocs, const Mat & image){
 			
 			
 			//on split les nouveau blocs
-			bloc1->split(blocs, image);
-			bloc2->split(blocs, image);
-			bloc3->split(blocs, image);
-			bloc4->split(blocs, image);
+			bloc1->split(blocs, image, imageCarree);
+			bloc2->split(blocs, image, imageCarree);
+			bloc3->split(blocs, image, imageCarree);
+			bloc4->split(blocs, image, imageCarree);
 			
 		
 		}

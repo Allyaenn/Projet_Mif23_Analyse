@@ -53,7 +53,7 @@ class Bloc{
 		//double calcule_valeur(Mat image);
 		
 		//sépare le bloc en 4 sous-blocs et réparti les voisins en fonction de la disposition
-		void split(std::list<Bloc*> & bloc, const Mat & image);
+		void split(std::list<Bloc*> & bloc, const Mat & image, const Mat & imageCarree);
 };
 
 class Region {

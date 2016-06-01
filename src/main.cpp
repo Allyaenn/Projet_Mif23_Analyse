@@ -89,8 +89,8 @@ int main(int argc, char ** argv){
         imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
-		//lisse = lissageCouleur(perso, 4, 18);
-		//imshow("Lisse", lisse);
+		lisse = lissageCouleur(perso, 4, 28, frame);
+		imshow("Lisse", lisse);
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);

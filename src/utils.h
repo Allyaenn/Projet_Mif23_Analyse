@@ -25,40 +25,41 @@ void usage();
 
 void wrongFormat();
 
-/*Calcul d'un lissage spatial 
-  noyau = moyenne*/
+/**
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = moyenne
+*/
 Mat spatialSmoothingAvg(const Mat & image, double lambda);
 
+/**
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = moyenne
+*/
 Mat spatialSmoothingAvgColor(const Mat & image, double lambda);
 
-/*Calcul d'un lissage spatial 
-  noyau = Gaussienne*/
+/**
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = Gaussienne
+*/
 Mat spatialSmoothingGauss(const Mat & image, double sigma);
 
+/**
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = Gaussienne
+*/
 Mat spatialSmoothingGaussColor(const Mat & image, double sigma);
 
-/*Calcul d'un lissage spatial 
-  noyau = fonction exponentielle*/
+/**
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = Exponentielle
+*/
 Mat spatialSmoothingExp(const Mat & image, double gamma);
 
+/**
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = Exponentielle
+*/
 Mat spatialSmoothingExpColor(const Mat & image, double gamma);
-
-/** 
- * Retourne vrai sil le pixel est situé à une certaine distance des bords de l'image
- * */
-bool isScreenEdge(int coordX, int coordY, int maxX, int maxY, double distance);
-
-
-
-/**
-* Extraction des pixels au premier plan dans une image couleur (3 canaux)
-*/
-Mat extractForegroundColor(const Mat & background, const Mat & frame);
-
-/**
-* Extraction des pixels au premier plan dans une image en niveaux de gris (1 canal)
-*/
-Mat extractForeground(const Mat & background, const Mat & frame);
 
 /**
  * Lissage temporel pour image couleur
@@ -71,16 +72,36 @@ Mat temporalSmoothingColor(String filename);
 Mat temporalSmoothing(String filename);
 
 /**
- * Lissage par rapport aux n voisins
+ * Extrait les éléments mouvants de @frame (image en couleurs)
+ * en comparant par rapport à  l'image de fond passée dans l'argument @Background
+ * @backgound Matrice contenant l'image de fond
+ * @frame Matrice contenant l'image complete
+ * @return les éléments mouvants extraits de frame
+ */
+Mat extractForegroundColor(const Mat & background, const Mat & frame);
+
+/**
+ * Extrait les éléments mouvants de @frame (image en niveaux de gris)
+ * en comparant par rapport à  l'image de fond passée dans l'argument @Background
+ * @backgound Matrice contenant l'image de fond
+ * @frame Matrice contenant l'image complete
+ * @return les éléments mouvants extraits de frame
+ */
+Mat extractForeground(const Mat & background, const Mat & frame);
+
+/**
+ * Lissage post-extraction par rapport aux voisins du pixel considéré
  */
 Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig);
 
 /**
-* Segementation de l'image par la méthode Split and Merge
-* Le critère de segmentation/fusion se base sur la couleur
+* Split de l'image en différents blocs
 */
 std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil);
 
+/**
+* Merge des blocs en différentes régions
+*/
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil);
 #endif
 

@@ -31,14 +31,6 @@ using namespace chrono;
  * 
  */
  
-void CallBackFunc(int event, int x, int y, int flags, void* userdata)
-{
-     if  ( event == EVENT_LBUTTONDOWN )
-     {
-          cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
-     }
-}
- 
 int main(int argc, char ** argv){
 
 	/**
@@ -86,11 +78,9 @@ int main(int argc, char ** argv){
     while(c != 'q' && !frame.empty())
     {
     	start = steady_clock::now();
-//    	cvtColor(frame, frame_NB, CV_BGR2GRAY);
-//    	perso = frame_NB;
         perso = spatialSmoothingGaussColor(frame, 1);
        //	spatialSmoothingGauss(frame_NB,1);
-       // perso = extractForegroundColor(background, perso);
+       perso = extractForegroundColor(background, perso);
        // splitAndMerge(perso);
         //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
@@ -98,17 +88,16 @@ int main(int argc, char ** argv){
         imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
-//		lisse = preciseSmoothing(perso, 4, 28, frame);
-//		imshow("Lisse", lisse);
+		lisse = preciseSmoothing(perso, 4, 28, frame);
+		imshow("Lisse", lisse);
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);
-        //vcP >> frame;
+        vcP >> frame;
     }
 
 
 	namedWindow("Test", 1);
-   	//setMouseCallback("Test", CallBackFunc, NULL);
 
 	unsigned short int tabCarres [lisse.rows*lisse.cols*3];
     std::list<Bloc*> blocs = split(lisse, tabCarres, 500);

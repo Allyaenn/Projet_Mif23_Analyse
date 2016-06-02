@@ -15,8 +15,9 @@ void wrongFormat(){
 }
 
 /**
- * Calcul d'un lissage spatial pour une image en niveau de gris
-  noyau = moyenne*/
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = moyenne
+*/
 Mat spatialSmoothingAvg(const Mat & image, double lambda)
 {
 	Mat copie = image.clone();
@@ -48,8 +49,9 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 }
 
 /**
- * Calcul d'un lissage spatial pour une image en couleurs
-  noyau = moyenne*/
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = moyenne
+*/
 Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 {
 	Mat copie = image.clone();
@@ -86,8 +88,9 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 
 
 /**
- * Calcul d'un lissage spatial pour une image en niveau de gris
-  noyau = Gaussienne*/
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = Gaussienne
+*/
 Mat spatialSmoothingGauss(const Mat & image, double sigma)
 {
 	Mat copie = image.clone();
@@ -129,8 +132,9 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 }
 
 /**
- * Calcul d'un lissage spatial pour une image en couleur
-  noyau = Gaussienne*/
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = Gaussienne
+*/
 Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 {
 	Mat copie = image.clone();
@@ -178,8 +182,9 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 }
 
 /**
- * Calcul d'un lissage spatial pour une image en niveau de gris
-  noyau = Exponentielle*/
+* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
+* noyau = Exponentielle
+*/
 Mat spatialSmoothingExp(const Mat & image, double gamma)
 {
 	Mat copie = image.clone();
@@ -219,8 +224,9 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 }
 
 /**
- * Calcul d'un lissage spatial pour une image en niveau de gris
-  noyau = Exponentielle*/
+* Calcul d'un lissage spatial sur une image couleur (3 canaux)
+* noyau = Exponentielle
+*/
 Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 {
 	Mat copie = image.clone();
@@ -262,112 +268,6 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 		}
 	}
 	return copie;	
-}
-
-
-/**
- * Retourne vrai si le pixel est situé à une certaine distance des bords de l'écran
- */
-bool isScreenEge(int coordX, int coordY, int maxX, int maxY, double distance){
-
-	if(distance < 0){
-		distance = 0;
-	}
-
-	/* Le point est entre 0 et la distance selon X*/
-	if(coordX <= distance ||
-			/* Le point est entre 0 et la distance selon Y*/
-			coordY <= distance ||
-			/* Le point est situé à proximité de la valeur max pour X*/
-			coordX >= (maxX - distance) ||
-			/* Le point est situé à proximité de la valeur max de Y*/
-			coordY >= (maxY - distance)){
-		
-		return true;
-	}
-	return false;
-}
-
-/**
- * Extrait les éléments mouvants de @frame
- * en comparant par rapport à  l'image de fond passée dans l'argument @Background
- * @backgound Matrice contenant l'image de fond
- * @frame Matrice contenant l'image complete
- * @return les éléments mouvants extraits de frame
- */
-Mat extractForegroundColor(const Mat & background, const Mat & frame){
-    Mat res;
-    int seuil = 14;
-    int lignes = frame.rows;
-    int colonnes = frame.cols;
-	
-    /*Vérification de la correspondance des dimensions*/
-	if (background.rows == lignes && background.cols == colonnes){
-        
-        res = Mat(frame.size(), frame.type());
-
-        /*comparaison de l'image avec l'arrière-plan
-        et construction d'une image où les différences apparaissent*/
-        for (int i = 0; i<lignes; i++){
-            for (int j = 0; j<colonnes; j++){
-            
-            	if(abs(frame.data[i*colonnes*3+j*3+0] - background.data[i*colonnes*3+j*3+0]) > seuil
-            	|| abs(frame.data[i*colonnes*3+j*3+1] - background.data[i*colonnes*3+j*3+1]) > seuil
-            	|| abs(frame.data[i*colonnes*3+j*3+2] - background.data[i*colonnes*3+j*3+2]) > seuil){
-
-                    res.data[i*colonnes*3+j*3+0] = frame.data[i*colonnes*3+j*3+0];
-                    res.data[i*colonnes*3+j*3+1] = frame.data[i*colonnes*3+j*3+1];
-                    res.data[i*colonnes*3+j*3+2] = frame.data[i*colonnes*3+j*3+2];
-				}
-                else{
-                	res.data[i*colonnes*3+j*3+0] = BLUE;
-                    res.data[i*colonnes*3+j*3+1] = GREEN;
-                    res.data[i*colonnes*3+j*3+2] = RED;
-                    //opencv fonctionne en BGR et non en RGB
-                }
-            }
-        }
-	}
-	else{
-		wrongFormat();
-	}
-    return res;
-}
-
-Mat extractForeground(const Mat & background, const Mat & frame)
-{
-    Mat res;
-    int seuil = 25;
-    int lignes = frame.rows;
-    int colonnes = frame.cols;
-	
-    /*Vérification de la correspondance des dimensions*/
-	if (background.rows == lignes && background.cols == colonnes)
-	{
-        res = Mat(frame.size(), frame.type());
-
-        /*comparaison de l'image avec l'arrière-plan
-        et construction d'une image où les différences apparaissent*/
-        for (int i = 0; i<lignes; i++)
-        {
-            for (int j = 0; j<colonnes; j++)
-            {
-
-                if(abs(frame.data[i*colonnes+j] - background.data[i*colonnes+j]) > seuil){
-
-                    res.data[i*colonnes+j] = frame.data[i*colonnes+j];
-
-                }
-                else{	
-                    res.data[i*colonnes+j] = GRAY;
-                }
-            }
-        }
-	}
-	else{
-		wrongFormat();
-	}
-    return res;
 }
 
 /**
@@ -466,8 +366,98 @@ Mat temporalSmoothing(String filename){
     return background;
 }
 
+
 /**
- * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
+ * Extrait les éléments mouvants de @frame (image en couleurs)
+ * en comparant par rapport à  l'image de fond passée dans l'argument @Background
+ * @backgound Matrice contenant l'image de fond
+ * @frame Matrice contenant l'image complete
+ * @return les éléments mouvants extraits de frame
+ */
+Mat extractForegroundColor(const Mat & background, const Mat & frame){
+    Mat res;
+    int seuil = 14;
+    int lignes = frame.rows;
+    int colonnes = frame.cols;
+	
+    /*Vérification de la correspondance des dimensions*/
+	if (background.rows == lignes && background.cols == colonnes){
+        
+        res = Mat(frame.size(), frame.type());
+
+        /*comparaison de l'image avec l'arrière-plan
+        et construction d'une image où les différences apparaissent*/
+        for (int i = 0; i<lignes; i++){
+            for (int j = 0; j<colonnes; j++){
+            
+            	if(abs(frame.data[i*colonnes*3+j*3+0] - background.data[i*colonnes*3+j*3+0]) > seuil
+            	|| abs(frame.data[i*colonnes*3+j*3+1] - background.data[i*colonnes*3+j*3+1]) > seuil
+            	|| abs(frame.data[i*colonnes*3+j*3+2] - background.data[i*colonnes*3+j*3+2]) > seuil){
+
+                    res.data[i*colonnes*3+j*3+0] = frame.data[i*colonnes*3+j*3+0];
+                    res.data[i*colonnes*3+j*3+1] = frame.data[i*colonnes*3+j*3+1];
+                    res.data[i*colonnes*3+j*3+2] = frame.data[i*colonnes*3+j*3+2];
+				}
+                else{
+                	res.data[i*colonnes*3+j*3+0] = BLUE;
+                    res.data[i*colonnes*3+j*3+1] = GREEN;
+                    res.data[i*colonnes*3+j*3+2] = RED;
+                    //opencv fonctionne en BGR et non en RGB
+                }
+            }
+        }
+	}
+	else{
+		wrongFormat();
+	}
+    return res;
+}
+
+/**
+ * Extrait les éléments mouvants de @frame (image en niveaux de gris)
+ * en comparant par rapport à  l'image de fond passée dans l'argument @Background
+ * @backgound Matrice contenant l'image de fond
+ * @frame Matrice contenant l'image complete
+ * @return les éléments mouvants extraits de frame
+ */
+Mat extractForeground(const Mat & background, const Mat & frame)
+{
+    Mat res;
+    int seuil = 25;
+    int lignes = frame.rows;
+    int colonnes = frame.cols;
+	
+    /*Vérification de la correspondance des dimensions*/
+	if (background.rows == lignes && background.cols == colonnes)
+	{
+        res = Mat(frame.size(), frame.type());
+
+        /*comparaison de l'image avec l'arrière-plan
+        et construction d'une image où les différences apparaissent*/
+        for (int i = 0; i<lignes; i++)
+        {
+            for (int j = 0; j<colonnes; j++)
+            {
+
+                if(abs(frame.data[i*colonnes+j] - background.data[i*colonnes+j]) > seuil){
+
+                    res.data[i*colonnes+j] = frame.data[i*colonnes+j];
+
+                }
+                else{	
+                    res.data[i*colonnes+j] = GRAY;
+                }
+            }
+        }
+	}
+	else{
+		wrongFormat();
+	}
+    return res;
+}
+
+/**
+ * Lissage post-extraction par rapport aux voisins du pixel considéré
  */
 Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 	
@@ -528,7 +518,9 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 	return retour;
 }
 
-//http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
+/**
+* Split de l'image en différents blocs
+*/
 std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil )
 {
 	steady_clock::time_point start, end;
@@ -546,9 +538,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	ymax = -1;
 	xmin = colonnes+1;
 	xmax = -1;
-	
-	// SPLIT
-	//extraction des pixels verts
+
 	for(int i = 0; i<lignes; i++)
 	{
 		for(int j = 0; j < colonnes; j++)
@@ -570,13 +560,10 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 				//on fait la modification préalable
 				tabCarres[i*colonnes*3+j*3+0] = (double)copie.data[i*colonnes*3+j*3+0] * (double)copie.data[i*colonnes*3+j*3+0];
 				tabCarres[i*colonnes*3+j*3+1] = (double)copie.data[i*colonnes*3+j*3+1] * (double)copie.data[i*colonnes*3+j*3+1];
-				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*colonnes*3+j*3+2] * (double)copie.data[i*colonnes*3+j*3+2];
-				
+				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*colonnes*3+j*3+2] * (double)copie.data[i*colonnes*3+j*3+2];	
 			}
 		}
 	}
-	
-//	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
 
 	blocsATraiter.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
 	
@@ -588,73 +575,70 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 		{
 			//séparation du bloc en 4
 			int nvX, nvY;
-			nvX = (temp->p_bd.x - temp->p_hg.x)/2;
-			nvY = (temp->p_bd.y - temp->p_hg.y)/2;
-			// std::cout<<std::endl;
+			pixel hg = temp->getP_hg();
+			pixel bd = temp->getP_bd();
+			nvX = (bd.x - hg.x)/2;
+			nvY = (bd.y - hg.y)/2;
 	
-			Bloc* bloc1  = new Bloc(pixel(temp->p_hg.x, temp->p_hg.y), pixel(nvX+temp->p_hg.x, nvY+temp->p_hg.y)); //OK
+			Bloc* bloc1  = new Bloc(pixel(hg.x, hg.y), pixel(nvX+hg.x, nvY+hg.y)); //OK
 	
-			Bloc* bloc2  = new Bloc(pixel(nvX+temp->p_hg.x+1, temp->p_hg.y), pixel(temp->p_bd.x, nvY+temp->p_hg.y));
+			Bloc* bloc2  = new Bloc(pixel(nvX+hg.x+1, hg.y), pixel(bd.x, nvY+hg.y));
 	
-			Bloc* bloc3  = new Bloc(pixel(temp->p_hg.x, nvY+temp->p_hg.y+1), pixel(nvX+temp->p_hg.x, temp->p_bd.y));
+			Bloc* bloc3  = new Bloc(pixel(hg.x, nvY+hg.y+1), pixel(nvX+hg.x, bd.y));
 	
-			Bloc* bloc4  = new Bloc(pixel(nvX+temp->p_hg.x+1, nvY+temp->p_hg.y+1), pixel(temp->p_bd.x, temp->p_bd.y)); //OK
+			Bloc* bloc4  = new Bloc(pixel(nvX+hg.x+1, nvY+hg.y+1), pixel(bd.x, bd.y)); //OK
 	
 			//répartion des vosins du bloc d'origine
 	
-			for (auto itv = temp->voisins.begin(); itv != temp->voisins.end(); itv++)
+			for (auto itv = temp->getVoisins().begin(); itv != temp->getVoisins().end(); itv++)
 			{
 				//supression du bloc principal en tant que voisin chez ses propres  voisins
-				for (auto it2 = (*itv)->voisins.begin(); it2 != (*itv)->voisins.end(); it2++)
+				for (auto it2 = (*itv)->getVoisins().begin(); it2 != (*itv)->getVoisins().end(); it2++)
 				{
 					if (*temp == **it2)
 					{
-						(*itv)->voisins.erase(it2);
+						(*itv)->getVoisins().erase(it2);
 						break;
 					}
 				}	
 			
 				if (bloc1->estVoisin(**itv)){
-					//std::cout<<"Le bloc 1 a un voisin"<<std::endl;
-					bloc1->voisins.push_back(*itv);
-					(*itv)->voisins.push_back(bloc1);
+					bloc1->getVoisins().push_back(*itv);
+					(*itv)->getVoisins().push_back(bloc1);
 				}
 			
 				if (bloc2->estVoisin(**itv)){
-					//std::cout<<"Le bloc 2 a un voisin"<<std::endl;
-					bloc2->voisins.push_back(*itv);
-					(*itv)->voisins.push_back(bloc2);
+					bloc2->getVoisins().push_back(*itv);
+					(*itv)->getVoisins().push_back(bloc2);
 				}
 			
 				if (bloc3->estVoisin(**itv)){
-					//std::cout<<"Le bloc 3 a un voisin"<<std::endl;
-					bloc3->voisins.push_back(*itv);
-					(*itv)->voisins.push_back(bloc3);
+					bloc3->getVoisins().push_back(*itv);
+					(*itv)->getVoisins().push_back(bloc3);
 				}
 			
 				if (bloc4->estVoisin(**itv)){
-					//std::cout<<"Le bloc 4 a un voisin"<<std::endl;
-					bloc4->voisins.push_back(*itv);
-					(*itv)->voisins.push_back(bloc4);
+					bloc4->getVoisins().push_back(*itv);
+					(*itv)->getVoisins().push_back(bloc4);
 				}
 			}
 		
 			//insertion des nouveaux blocs dans les listes de voisins
-			bloc1->voisins.push_back(bloc2);
-			bloc1->voisins.push_back(bloc3);
-			bloc1->voisins.push_back(bloc4);
+			bloc1->getVoisins().push_back(bloc2);
+			bloc1->getVoisins().push_back(bloc3);
+			bloc1->getVoisins().push_back(bloc4);
 		
-			bloc2->voisins.push_back(bloc1);
-			bloc2->voisins.push_back(bloc3);
-			bloc2->voisins.push_back(bloc4);
+			bloc2->getVoisins().push_back(bloc1);
+			bloc2->getVoisins().push_back(bloc3);
+			bloc2->getVoisins().push_back(bloc4);
 		
-			bloc3->voisins.push_back(bloc1);
-			bloc3->voisins.push_back(bloc2);
-			bloc3->voisins.push_back(bloc4);
+			bloc3->getVoisins().push_back(bloc1);
+			bloc3->getVoisins().push_back(bloc2);
+			bloc3->getVoisins().push_back(bloc4);
 		
-			bloc4->voisins.push_back(bloc1);
-			bloc4->voisins.push_back(bloc2);
-			bloc4->voisins.push_back(bloc3);
+			bloc4->getVoisins().push_back(bloc1);
+			bloc4->getVoisins().push_back(bloc2);
+			bloc4->getVoisins().push_back(bloc3);
 			
 			//suppression de l'ancien bloc
 			blocsATraiter.pop_front();
@@ -694,6 +678,9 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	return blocsDefinitifs;
 }
 
+/**
+* Merge des blocs en différentes régions
+*/
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil)
 {
 	std::list<Bloc*> blocsLibres = blocs;
@@ -716,7 +703,7 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 		regTemp = new Region();
 		regTemp->addBloc(blocTemp);
 		regTemp->updateVar(image, tabCarres);
-		voisins.insert(voisins.end(), blocTemp->voisins.begin(), blocTemp->voisins.end());
+		voisins.insert(voisins.end(), blocTemp->getVoisins().begin(), blocTemp->getVoisins().end());
 		//parcours des voisins de la région (c'est à dire les voisins libres des blocs constituant la région)
 
 		while(!voisins.empty())
@@ -734,7 +721,7 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 					regTemp->addBloc(blocVois);
 					regTemp->updateVar(image, tabCarres);
 					//ajout des voisins dans les voisins
-					voisins.insert(voisins.end(), blocVois->voisins.begin(), blocVois->voisins.end());
+					voisins.insert(voisins.end(), blocVois->getVoisins().begin(), blocVois->getVoisins().end());
 					//on le retire des blocs libres
 					blocsLibres.erase(it);
 				}
@@ -749,6 +736,7 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 		regionsDef.push_back(regTemp);
 	}
 	
+	//transformation de l'image de départ pour montrer les resultats du merge
 	double * tabMoys;
 	int i = 0;
 	for (auto itReg = regionsDef.begin(); itReg != regionsDef.end(); itReg++)
@@ -757,9 +745,11 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 		for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
 		{
 			//colorer chaque pixel avec la couleur moyenne de chaque région
-			for (int i = (*itBloc)->p_hg.y; i < (*itBloc)->p_bd.y; i++)
+			pixel hg = (*itBloc)->getP_hg();
+			pixel bd = (*itBloc)->getP_bd();
+			for (int i = hg.y; i < bd.y; i++)
 			{
-				for (int j = (*itBloc)->p_hg.x; j < (*itBloc)->p_bd.x; j++)
+				for (int j = hg.x; j < bd.x; j++)
 				{
 					if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
 				       && image.data[i*colonnes*3+j*3+1] == GREEN 
@@ -773,7 +763,6 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 			}
 		}
 	}
-	
 	end = steady_clock::now();
 	std::cout<<"time merge : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
 	return regionsDef;

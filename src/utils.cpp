@@ -516,7 +516,7 @@ Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis){
 }
 
 //http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
-std::list<Bloc*> split(const Mat & image)
+std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil )
 {
 	steady_clock::time_point start, end;
 	start = steady_clock::now();
@@ -524,7 +524,6 @@ std::list<Bloc*> split(const Mat & image)
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	Mat copie = image.clone();
-	unsigned short int tabCarres [lignes*colonnes*3];
 	std::list<Bloc*> blocsATraiter;
 	std::list<Bloc*> blocsDefinitifs;
 	Bloc* temp;
@@ -573,7 +572,7 @@ std::list<Bloc*> split(const Mat & image)
   	{
   		temp = blocsATraiter.front();
 		
-		if (temp->hasToBeSplitted(image, tabCarres)) // a faire varier
+		if (temp->hasToBeSplitted(image, tabCarres, seuil))
 		{
 			//séparation du bloc en 4
 			int nvX, nvY;
@@ -683,37 +682,85 @@ std::list<Bloc*> split(const Mat & image)
 	return blocsDefinitifs;
 }
 
-std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image)
+std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil)
 {
 	std::list<Bloc*> blocsLibres = blocs;
 	steady_clock::time_point start, end;
 	start = steady_clock::now();
+	int lignes = image.rows;
+	int colonnes = image.cols;
 	std::list<Region*> regionsDef;
 	std::list<Bloc*> voisins;
 	Region* regTemp;
 	Bloc* blocTemp;
+	Bloc* blocVois;
 	
 	//blocs contient les blocs "libres" (qui n'appartiennent pas déjà à une région)
-	while (blocsLibres.empty())
+	while (!blocsLibres.empty())
 	{
 		//création d'une nouvelle région
 		blocTemp = blocsLibres.front();
 		blocsLibres.pop_front();
 		regTemp = new Region();
 		regTemp->addBloc(blocTemp);
+		regTemp->updateVar(image, tabCarres);
 		voisins.insert(voisins.end(), blocTemp->voisins.begin(), blocTemp->voisins.end());
 		//parcours des voisins de la région (c'est à dire les voisins libres des blocs constituant la région)
-		while(voisins.empty())
+
+		while(!voisins.empty())
 		{
 			//depop du premier voisin
-			//si il est dans les blocs libres
+			blocVois = voisins.front();
+			voisins.pop_front();
+			std::list<Bloc*>::iterator it;
+  			it = find (blocsLibres.begin(), blocsLibres.end(), blocVois);
+  			if (it != blocsLibres.end()){ //si il est dans les blocs libres
+  			  	//std::cout<<"L'un de mes voisins est libre"<<std::endl;
 				// si valeur ok -> on fusionnne	(ajout du bloc dans la région + ajout des voisins dans les voisins)
+				if (regTemp->isConsistent(*blocVois, seuil)){
+					//fusion
+					regTemp->addBloc(blocVois);
+					regTemp->updateVar(image, tabCarres);
+					//ajout des voisins dans les voisins
+					voisins.insert(voisins.end(), blocVois->voisins.begin(), blocVois->voisins.end());
+					//on le retire des blocs libres
+					blocsLibres.erase(it);
+				}
+				//else le voisin ne nous interesse pas
 				// sinon rien
-			
-		}
+  			}
+  			//else le voisin n'est pas libre, on ne le considère pas
+		} // il n'y a plus de voisins à explorer
 		
-		//ajout de la région dans la liste des régions definitives 
+		//ajout de la région dans la liste des régions definitives
+		voisins.clear();
 		regionsDef.push_back(regTemp);
+	}
+	
+	double * tabMoys;
+	int i = 0;
+	for (auto itReg = regionsDef.begin(); itReg != regionsDef.end(); itReg++)
+	{
+		tabMoys = (*itReg)->getMoy();
+		for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
+		{
+			//colorer chaque pixel avec la couleur moyenne de chaque région
+			for (int i = (*itBloc)->p_hg.y; i < (*itBloc)->p_bd.y; i++)
+			{
+				for (int j = (*itBloc)->p_hg.x; j < (*itBloc)->p_bd.x; j++)
+				{
+					if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
+				       && image.data[i*colonnes*3+j*3+1] == GREEN 
+				       && image.data[i*colonnes*3+j*3+2] == RED))
+					{
+						image.data[i*colonnes*3+j*3+0] = tabMoys[0];
+						image.data[i*colonnes*3+j*3+1] = tabMoys[1];
+						image.data[i*colonnes*3+j*3+2] = tabMoys[2];
+					}
+					
+				}
+			}
+		}
 	}
 	
 	end = steady_clock::now();

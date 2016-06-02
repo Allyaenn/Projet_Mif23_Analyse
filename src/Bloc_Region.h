@@ -32,7 +32,9 @@ class Bloc{
 		 pixel p_hg; // représente le pixel en haut a gauche du bloc (comportant xmin et ymin)
 		 pixel p_bd; // représente le pixel en bas a droite du bloc (comportant xmax et ymax)
 		 int nb_pixels; // donne le nombre de pixels stockés dans la région (les pixels de l'arrière plan ne sont pas pris en compte)
-		 double valeur; // la variance
+		 double varB; // la variance pour le canal BLUE
+		 double varG; // la variance pour le canal GREEN
+		 double varR; // la variance pour le canal RED
 		 std::list<Bloc*> voisins; // les voisins
 
 		Bloc();
@@ -47,23 +49,36 @@ class Bloc{
 		
 		bool estVoisin(const Bloc & b);
 		
-		//calcule la valeur (variance) associée à la région selon l'image passée en paramètres
-		//double calcule_valeur(Mat image);
-		
 		//sépare le bloc en 4 sous-blocs et réparti les voisins en fonction de la disposition
-		bool hasToBeSplitted(const Mat & image, const unsigned short int tabCarres []);
+		bool hasToBeSplitted(const Mat & image, const unsigned short int tabCarres [], double seuil);
+
 };
 
 class Region {
 
 	private : 
 		std::list<Bloc*> blocs;
+		double varB;
+		double varG;
+		double varR;
+		
+		double moyB;
+		double moyG;
+		double moyR;
 		
 	public : 
 	
 		Region();
 		
 		void addBloc(Bloc * b);
+		
+		const std::list<Bloc*> & getBlocs();
+		
+		double * getMoy(); 
+		
+		void updateVar(const Mat & image, const unsigned short int tabCarres []);
+		
+		bool isConsistent(const Bloc & b, double seuil);
 		
 };
 

@@ -7,5 +7,4 @@ const int BLUE = 0;
 
 const int GRAY = 0;
 
-
 #endif

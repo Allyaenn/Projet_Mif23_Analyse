@@ -11,6 +11,7 @@
 #include <list>
 #include <ctime>
 #include <chrono>
+#include <algorithm>
 #include "Bloc_Region.h"
 
 using namespace cv;
@@ -78,8 +79,8 @@ Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis);
 * Segementation de l'image par la méthode Split and Merge
 * Le critère de segmentation/fusion se base sur la couleur
 */
-std::list<Bloc*> split(const Mat & image);
+std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil);
 
-std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image);
+std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil);
 #endif
 

@@ -110,9 +110,10 @@ int main(int argc, char ** argv){
 	namedWindow("Test", 1);
    	//setMouseCallback("Test", CallBackFunc, NULL);
 
+	unsigned short int tabCarres [perso.rows*perso.cols*3];
 	//lisse = lissageCouleur(perso, 4, 18);
-    std::list<Bloc*> blocs = split(perso);
-    merge(blocs, perso);
+    std::list<Bloc*> blocs = split(perso, tabCarres, 500);
+    merge(blocs, perso, tabCarres, 10000);
     char d;
     d = (char)waitKey(1);
     namedWindow("Test", 1);

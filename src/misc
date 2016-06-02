@@ -327,3 +327,15 @@ int size = (temp->p_bd.x - temp->p_hg.x)*(temp->p_bd.y-temp->p_hg.y);
 	//		std::cout<<"nb_pixels : "<<n<<std::endl;
 	//		std::cout<<"vars :"<<var0<<" - "<<var1<<" - "<<var2<<std::endl;
 	
+			
+//		for (auto it2 = voisins.begin(); it2 != voisins.end(); it2++ )
+//		{
+//			std::cout<<"voisins : "<<*it2<<std::endl;
+//		}
+//		
+//		for (auto it = blocsLibres.begin(); it != blocsLibres.end(); it++ )
+//		{
+//			std::cout<<"bl : "<<*it<<std::endl;
+//		}
+
+	

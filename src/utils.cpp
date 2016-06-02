@@ -466,86 +466,6 @@ Mat temporalSmoothing(String filename){
     return background;
 }
 
-//http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
-void splitAndMerge(const Mat & image)
-{
-	Mat copieCarree = Mat(image.rows, image.cols, CV_64FC3,Scalar::all(0));
-	Mat copie = image.clone();
-	steady_clock::time_point start, end;
-	start = steady_clock::now();
-	std::list<Bloc*> blocs;
-	int lignes = copie.rows;
-	int colonnes = copie.cols;
-	int xmin, xmax, ymin, ymax;
-	ymin = lignes+1;
-	ymax = -1;
-	xmin = colonnes+1;
-	xmax = -1;
-	
-	//extraction des pixels verts
-	for(int i = 0; i<lignes; i++)
-	{
-		for(int j = 0; j < colonnes; j++)
-		{
-			if (!(copie.data[i*colonnes*3+j*3+0] == BLUE && copie.data[i*colonnes*3+j*3+1] == GREEN && copie.data[i*colonnes*3+j*3+2] == RED))
-			{
-				if (j>xmax)
-					xmax = j;
-				if (j<xmin)
-					xmin = j;
-					
-				if (i>ymax)
-					ymax = i;
-				if (i<ymin)
-					ymin = i;
-				
-				//on fait la modification préalable
-				copieCarree.data[i*colonnes*3+j*3+0] = (double)pow(copie.data[i*colonnes*3+j*3+0],2);
-				std::cout<<"Carré  = "<<copieCarree.data[i*colonnes*3+j*3+0]<<std::endl;
-				std::cout<<"Carré_pow  = "<<pow(copie.data[i*colonnes*3+j*3+0],2);
-				copieCarree.data[i*colonnes*3+j*3+1] = (double)pow(copie.data[i*colonnes*3+j*3+1],2);
-				copieCarree.data[i*colonnes*3+j*3+2] = (double) pow(copie.data[i*colonnes*3+j*3+2],2);
-			}
-		}
-	}
-	
-	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
-	std::cout<<"ymin : "<<ymin<<" ymax : "<<ymax<<std::endl;
-
-	blocs.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
-	
-	 cout << "M = " << endl << " " << copieCarree<< endl << endl;
-	
-	blocs.front()->split(blocs, copie, copieCarree);
-	
-	//affichage du résultat du split (destiné à disparaitre)
-	
-	auto itBloc = blocs.begin();
-	itBloc++; itBloc++;itBloc++;itBloc++;
-	rectangle(image, Point((*itBloc)->p_hg.x,(*itBloc)->p_hg.y), Point ((*itBloc)->p_bd.x,(*itBloc)->p_bd.y), CV_RGB(255,0,0),CV_FILLED);
-	for(auto it = (*itBloc)->getVoisins().begin(); it != (*itBloc)->getVoisins().end(); it++)
-	{
-		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), CV_RGB(0,0,255),CV_FILLED);
-	}
-	
-	for(auto it = blocs.begin(); it != blocs.end(); it++)
-	{
-		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
-	}
-	
-	end = steady_clock::now();
-	 std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
-	
-//	for(int i = ymin; i<ymax; i++)
-//	{
-//		for(int j = xmin; j < xmax; j++)
-//		{
-//			image.data[i*colonnes*3+j*3+1] = 255;
-//		}
-//	}
-	
-}
-
 /**
  * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
  */
@@ -593,4 +513,210 @@ Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis){
 	}
 	return retour;
 
+}
+
+//http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
+std::list<Bloc*> split(const Mat & image)
+{
+	steady_clock::time_point start, end;
+	start = steady_clock::now();
+	
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	Mat copie = image.clone();
+	unsigned short int tabCarres [lignes*colonnes*3];
+	std::list<Bloc*> blocsATraiter;
+	std::list<Bloc*> blocsDefinitifs;
+	Bloc* temp;
+	
+	int xmin, xmax, ymin, ymax;
+	ymin = lignes+1;
+	ymax = -1;
+	xmin = colonnes+1;
+	xmax = -1;
+	
+	// SPLIT
+	//extraction des pixels verts
+	for(int i = 0; i<lignes; i++)
+	{
+		for(int j = 0; j < colonnes; j++)
+		{
+			if (!(copie.data[i*colonnes*3+j*3+0] == BLUE 
+			   && copie.data[i*colonnes*3+j*3+1] == GREEN 
+			   && copie.data[i*colonnes*3+j*3+2] == RED))
+			{
+				if (j>xmax)
+					xmax = j;
+				if (j<xmin)
+					xmin = j;
+					
+				if (i>ymax)
+					ymax = i;
+				if (i<ymin)
+					ymin = i;
+				
+				//on fait la modification préalable
+				tabCarres[i*colonnes*3+j*3+0] = (double)copie.data[i*colonnes*3+j*3+0] * (double)copie.data[i*colonnes*3+j*3+0];
+				tabCarres[i*colonnes*3+j*3+1] = (double)copie.data[i*colonnes*3+j*3+1] * (double)copie.data[i*colonnes*3+j*3+1];
+				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*colonnes*3+j*3+2] * (double)copie.data[i*colonnes*3+j*3+2];
+				
+			}
+		}
+	}
+	
+//	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
+//	std::cout<<"ymin : "<<ymin<<" ymax : "<<ymax<<std::endl;
+
+	blocsATraiter.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
+	
+	while (!blocsATraiter.empty())
+  	{
+  		temp = blocsATraiter.front();
+		
+		if (temp->hasToBeSplitted(image, tabCarres)) // a faire varier
+		{
+			//séparation du bloc en 4
+			int nvX, nvY;
+			nvX = (temp->p_bd.x - temp->p_hg.x)/2;
+			nvY = (temp->p_bd.y - temp->p_hg.y)/2;
+			// std::cout<<std::endl;
+	
+			Bloc* bloc1  = new Bloc(pixel(temp->p_hg.x, temp->p_hg.y), pixel(nvX+temp->p_hg.x, nvY+temp->p_hg.y)); //OK
+	
+			Bloc* bloc2  = new Bloc(pixel(nvX+temp->p_hg.x+1, temp->p_hg.y), pixel(temp->p_bd.x, nvY+temp->p_hg.y));
+	
+			Bloc* bloc3  = new Bloc(pixel(temp->p_hg.x, nvY+temp->p_hg.y+1), pixel(nvX+temp->p_hg.x, temp->p_bd.y));
+	
+			Bloc* bloc4  = new Bloc(pixel(nvX+temp->p_hg.x+1, nvY+temp->p_hg.y+1), pixel(temp->p_bd.x, temp->p_bd.y)); //OK
+	
+			//répartion des vosins du bloc d'origine
+	
+			for (auto itv = temp->voisins.begin(); itv != temp->voisins.end(); itv++)
+			{
+				//supression du bloc principal en tant que voisin chez ses propres  voisins
+				for (auto it2 = (*itv)->voisins.begin(); it2 != (*itv)->voisins.end(); it2++)
+				{
+					if (*temp == **it2)
+					{
+						(*itv)->voisins.erase(it2);
+						break;
+					}
+				}	
+			
+				if (bloc1->estVoisin(**itv)){
+					//std::cout<<"Le bloc 1 a un voisin"<<std::endl;
+					bloc1->voisins.push_back(*itv);
+					(*itv)->voisins.push_back(bloc1);
+				}
+			
+				if (bloc2->estVoisin(**itv)){
+					//std::cout<<"Le bloc 2 a un voisin"<<std::endl;
+					bloc2->voisins.push_back(*itv);
+					(*itv)->voisins.push_back(bloc2);
+				}
+			
+				if (bloc3->estVoisin(**itv)){
+					//std::cout<<"Le bloc 3 a un voisin"<<std::endl;
+					bloc3->voisins.push_back(*itv);
+					(*itv)->voisins.push_back(bloc3);
+				}
+			
+				if (bloc4->estVoisin(**itv)){
+					//std::cout<<"Le bloc 4 a un voisin"<<std::endl;
+					bloc4->voisins.push_back(*itv);
+					(*itv)->voisins.push_back(bloc4);
+				}
+			}
+		
+			//insertion des nouveaux blocs dans les listes de voisins
+			bloc1->voisins.push_back(bloc2);
+			bloc1->voisins.push_back(bloc3);
+			bloc1->voisins.push_back(bloc4);
+		
+			bloc2->voisins.push_back(bloc1);
+			bloc2->voisins.push_back(bloc3);
+			bloc2->voisins.push_back(bloc4);
+		
+			bloc3->voisins.push_back(bloc1);
+			bloc3->voisins.push_back(bloc2);
+			bloc3->voisins.push_back(bloc4);
+		
+			bloc4->voisins.push_back(bloc1);
+			bloc4->voisins.push_back(bloc2);
+			bloc4->voisins.push_back(bloc3);
+			
+			//suppression de l'ancien bloc
+			blocsATraiter.pop_front();
+		
+			//insertion des nouveaux blocs dans la listes
+			blocsATraiter.push_back(bloc1);
+			blocsATraiter.push_back(bloc2);
+			blocsATraiter.push_back(bloc3);
+			blocsATraiter.push_back(bloc4);
+
+		}
+		else
+		{
+			blocsATraiter.pop_front();
+			blocsDefinitifs.push_back(temp);
+		}
+	}
+	
+	//affichage du résultat du split (destiné à disparaitre)
+	
+//	auto itBloc = blocsDefinitifs.begin();
+//	for (int i = 0; i<57; i++)
+//		itBloc++;
+//	rectangle(image, Point((*itBloc)->p_hg.x,(*itBloc)->p_hg.y), Point ((*itBloc)->p_bd.x,(*itBloc)->p_bd.y), CV_RGB(255,0,0),CV_FILLED);
+//	for(auto it = (*itBloc)->getVoisins().begin(); it != (*itBloc)->getVoisins().end(); it++)
+//	{
+//		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), CV_RGB(0,0,255),CV_FILLED);
+//	}
+//	
+//	for(auto it = blocsDefinitifs.begin(); it != blocsDefinitifs.end(); it++)
+//	{
+//		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
+//	}
+
+	end = steady_clock::now();
+	std::cout<<"time split : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
+	return blocsDefinitifs;
+}
+
+std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image)
+{
+	std::list<Bloc*> blocsLibres = blocs;
+	steady_clock::time_point start, end;
+	start = steady_clock::now();
+	std::list<Region*> regionsDef;
+	std::list<Bloc*> voisins;
+	Region* regTemp;
+	Bloc* blocTemp;
+	
+	//blocs contient les blocs "libres" (qui n'appartiennent pas déjà à une région)
+	while (blocsLibres.empty())
+	{
+		//création d'une nouvelle région
+		blocTemp = blocsLibres.front();
+		blocsLibres.pop_front();
+		regTemp = new Region();
+		regTemp->addBloc(blocTemp);
+		voisins.insert(voisins.end(), blocTemp->voisins.begin(), blocTemp->voisins.end());
+		//parcours des voisins de la région (c'est à dire les voisins libres des blocs constituant la région)
+		while(voisins.empty())
+		{
+			//depop du premier voisin
+			//si il est dans les blocs libres
+				// si valeur ok -> on fusionnne	(ajout du bloc dans la région + ajout des voisins dans les voisins)
+				// sinon rien
+			
+		}
+		
+		//ajout de la région dans la liste des régions definitives 
+		regionsDef.push_back(regTemp);
+	}
+	
+	end = steady_clock::now();
+	std::cout<<"time merge : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
+	return regionsDef;
 }

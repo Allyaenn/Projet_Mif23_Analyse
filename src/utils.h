@@ -70,15 +70,16 @@ Mat temporalSmoothingColor(String filename);
 Mat temporalSmoothing(String filename);
 
 /**
-* Segementation de l'image par la méthode Split and Merge
-* Le critère de segmentation/fusion se base sur la couleur
-*/
-void splitAndMerge(const Mat & image);
-
-/**
  * Lissage par rapport aux n voisins
  */
 Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis);
 
+/**
+* Segementation de l'image par la méthode Split and Merge
+* Le critère de segmentation/fusion se base sur la couleur
+*/
+std::list<Bloc*> split(const Mat & image);
+
+std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image);
 #endif
 

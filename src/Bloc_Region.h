@@ -34,9 +34,7 @@ class Bloc{
 		 int nb_pixels; // donne le nombre de pixels stockés dans la région (les pixels de l'arrière plan ne sont pas pris en compte)
 		 double valeur; // la variance
 		 std::list<Bloc*> voisins; // les voisins
-	
-	
-	
+
 		Bloc();
 		
 		Bloc(pixel hg, pixel bd, std::list<Bloc*> v);
@@ -53,7 +51,7 @@ class Bloc{
 		//double calcule_valeur(Mat image);
 		
 		//sépare le bloc en 4 sous-blocs et réparti les voisins en fonction de la disposition
-		void split(std::list<Bloc*> & bloc, const Mat & image, const Mat & imageCarree);
+		bool hasToBeSplitted(const Mat & image, const unsigned short int tabCarres []);
 };
 
 class Region {
@@ -64,6 +62,8 @@ class Region {
 	public : 
 	
 		Region();
+		
+		void addBloc(Bloc * b);
 		
 };
 

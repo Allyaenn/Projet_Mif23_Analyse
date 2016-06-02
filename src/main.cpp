@@ -31,6 +31,14 @@ using namespace chrono;
  * 
  */
  
+void CallBackFunc(int event, int x, int y, int flags, void* userdata)
+{
+     if  ( event == EVENT_LBUTTONDOWN )
+     {
+          cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+     }
+}
+ 
 int main(int argc, char ** argv){
 
 	/**
@@ -40,7 +48,7 @@ int main(int argc, char ** argv){
 		usage();
 		return EXIT_FAILURE;
 	}
-
+	
     /*Nom des fichiers vidéos à exploiter*/
 	string filename_bg = String(argv[1]);
 	string filename_ps = String(argv[2]);
@@ -83,6 +91,7 @@ int main(int argc, char ** argv){
         perso = spatialSmoothingGaussColor(frame, 1);
        //	spatialSmoothingGauss(frame_NB,1);
         perso = extractForegroundColor(background, perso);
+       // splitAndMerge(perso);
         //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
         //perso = frame_NB;
@@ -94,11 +103,16 @@ int main(int argc, char ** argv){
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);
-        vcP >> frame;
+        //vcP >> frame;
     }
 
+
+	namedWindow("Test", 1);
+   	//setMouseCallback("Test", CallBackFunc, NULL);
+
 	//lisse = lissageCouleur(perso, 4, 18);
-    splitAndMerge(perso);
+    std::list<Bloc*> blocs = split(perso);
+    merge(blocs, perso);
     char d;
     d = (char)waitKey(1);
     namedWindow("Test", 1);

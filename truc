@@ -1,6 +1,0 @@
-
-
-Solutions pour améliorer l'extraction
-
--Faire une mise a jour du background, en remplaçant ses éléments par les éléments de l'image en cours (selon un seuil)
--Créer un background amélioré : chaque point est une moyenne des valeurs des points de toutes les images, différences  mise à part.

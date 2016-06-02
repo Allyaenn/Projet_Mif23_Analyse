@@ -469,34 +469,43 @@ Mat temporalSmoothing(String filename){
 /**
  * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
  */
-Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis){
+Mat lissageCouleur(Mat image, int nbrVoisin, int requis, Mat orig){
 	
 	Mat retour(image.size(), image.type());
-	int count;
+	int count, total;
+	int colonnes = image.cols;
+	int lignes = image.rows;
 	int iMax, jMax, iMin, jMin;
+	Vec3b fond = Vec3b(BLUE, GREEN, RED);
 
-	for(int x = 0; x < image.rows - 1; x++){
-		for(int y = 0; y < image.cols - 1; y++){
-			if(retour.at<Vec3b>(x,y) != Vec3b(255, 255, 255)){
+	for(int x = 0; x < lignes; x++){
+		for(int y = 0; y < colonnes; y++){
+			retour.at<Vec3b>(x, y) = image.at<Vec3b>(x, y);
+			if(image.at<Vec3b>(x,y) != fond){
 
 				count = 0;
+				total = 0;
 				iMax = x + nbrVoisin;
 				iMin = x - nbrVoisin;
 				jMax = y + nbrVoisin;
 				jMin = y - nbrVoisin;
 
-				if(x -  nbrVoisin < 0)
+				if(iMin < 0)
 					iMin = nbrVoisin - x - nbrVoisin;
-				if(x + nbrVoisin > image.rows - 1)
-					iMax = image.rows -1 - x;
-				if(y - nbrVoisin < 0)
+				if(iMax >= lignes)
+					iMax = lignes - x;
+				if(jMin < 0)
 					jMin = nbrVoisin - y - nbrVoisin;
-				if(y + nbrVoisin > image.cols - 1)
-					jMax = image.cols - 1 - y;
+				if(jMax >= colonnes)
+					jMax = colonnes - y;
+
+				//printf("Point : (%i, %i)\n", x, y);
+
+				//std::cout << "iMax : " << iMax << " iMin : " << iMin << " jMin : " << jMin << " jMax : " << jMax << std::endl;
 
 				for(int i = iMin; i < iMax; i++){
 					for(int j = jMin; j < jMax; j++){
-						if(retour.at<Vec3b>(x + i,y + j) != Vec3b(255, 255, 255))
+						if(image.at<Vec3b>(i,j) != fond)
 							count++;
 						if(count > requis)
 							break;
@@ -504,15 +513,15 @@ Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis){
 					if(count > requis)
 						break;
 				}
+				//printf("\n");
 				count--;
 				if(count < requis){
-					retour.at<Vec3b>(x,y) = Vec3b(255, 255, 255);
+					retour.at<Vec3b>(x,y) = fond;
 				}
 			}
 		}
 	}
 	return retour;
-
 }
 
 //http://stackoverflow.com/questions/23468537/differences-of-using-const-cvmat-cvmat-cvmat-or-const-cvmat
@@ -564,7 +573,6 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	}
 	
 //	std::cout<<"xmin : "<<xmin<<" xmax : "<<xmax<<std::endl;
-//	std::cout<<"ymin : "<<ymin<<" ymax : "<<ymax<<std::endl;
 
 	blocsATraiter.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
 	
@@ -757,7 +765,6 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 						image.data[i*colonnes*3+j*3+1] = tabMoys[1];
 						image.data[i*colonnes*3+j*3+2] = tabMoys[2];
 					}
-					
 				}
 			}
 		}

@@ -98,8 +98,8 @@ int main(int argc, char ** argv){
         imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
-		//lisse = lissageCouleur(perso, 4, 18);
-		//imshow("Lisse", lisse);
+		lisse = lissageCouleur(perso, 4, 28, frame);
+		imshow("Lisse", lisse);
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);
@@ -111,7 +111,6 @@ int main(int argc, char ** argv){
    	//setMouseCallback("Test", CallBackFunc, NULL);
 
 	unsigned short int tabCarres [perso.rows*perso.cols*3];
-	//lisse = lissageCouleur(perso, 4, 18);
     std::list<Bloc*> blocs = split(perso, tabCarres, 500);
     merge(blocs, perso, tabCarres, 10000);
     char d;

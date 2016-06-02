@@ -73,7 +73,7 @@ Mat temporalSmoothing(String filename);
 /**
  * Lissage par rapport aux n voisins
  */
-Mat lissageCouleur(const Mat & image, int nbrVoisin, int requis);
+Mat lissageCouleur(Mat image, int nbrVoisin, int requis, Mat orig);
 
 /**
 * Segementation de l'image par la méthode Split and Merge

@@ -90,7 +90,7 @@ int main(int argc, char ** argv){
 //    	perso = frame_NB;
         perso = spatialSmoothingGaussColor(frame, 1);
        //	spatialSmoothingGauss(frame_NB,1);
-        perso = extractForegroundColor(background, perso);
+       // perso = extractForegroundColor(background, perso);
        // splitAndMerge(perso);
         //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
@@ -98,8 +98,8 @@ int main(int argc, char ** argv){
         imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
-		lisse = lissageCouleur(perso, 4, 28, frame);
-		imshow("Lisse", lisse);
+//		lisse = preciseSmoothing(perso, 4, 28, frame);
+//		imshow("Lisse", lisse);
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
         c = (char)waitKey(1);
@@ -110,15 +110,15 @@ int main(int argc, char ** argv){
 	namedWindow("Test", 1);
    	//setMouseCallback("Test", CallBackFunc, NULL);
 
-	unsigned short int tabCarres [perso.rows*perso.cols*3];
-    std::list<Bloc*> blocs = split(perso, tabCarres, 500);
-    merge(blocs, perso, tabCarres, 10000);
+	unsigned short int tabCarres [lisse.rows*lisse.cols*3];
+    std::list<Bloc*> blocs = split(lisse, tabCarres, 500);
+    merge(blocs, lisse, tabCarres, 10000);
     char d;
     d = (char)waitKey(1);
     namedWindow("Test", 1);
     while(d != 'q')
     {
-   		 imshow("Test", perso);
+   		 imshow("Test", lisse);
    		 d = (char)waitKey(1);
    	}
    	

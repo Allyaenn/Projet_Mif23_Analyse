@@ -469,20 +469,25 @@ Mat temporalSmoothing(String filename){
 /**
  * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
  */
-Mat lissageCouleur(Mat image, int nbrVoisin, int requis, Mat orig){
+Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 	
 	Mat retour(image.size(), image.type());
 	int count, total;
 	int colonnes = image.cols;
 	int lignes = image.rows;
 	int iMax, jMax, iMin, jMin;
-	Vec3b fond = Vec3b(BLUE, GREEN, RED);
+	//Vec3b fond = Vec3b(BLUE, GREEN, RED);
 
 	for(int x = 0; x < lignes; x++){
 		for(int y = 0; y < colonnes; y++){
-			retour.at<Vec3b>(x, y) = image.at<Vec3b>(x, y);
-			if(image.at<Vec3b>(x,y) != fond){
-
+			retour.data[x*colonnes*3+y*3+0] = image.data[x*colonnes*3+y*3+0];
+			retour.data[x*colonnes*3+y*3+1] = image.data[x*colonnes*3+y*3+1];
+			retour.data[x*colonnes*3+y*3+2] = image.data[x*colonnes*3+y*3+2];
+			
+			if (!(image.data[x*colonnes*3+y*3+0] == BLUE 
+		       && image.data[x*colonnes*3+y*3+1] == GREEN 
+		       && image.data[x*colonnes*3+y*3+2] == RED))
+			{
 				count = 0;
 				total = 0;
 				iMax = x + nbrVoisin;
@@ -499,13 +504,11 @@ Mat lissageCouleur(Mat image, int nbrVoisin, int requis, Mat orig){
 				if(jMax >= colonnes)
 					jMax = colonnes - y;
 
-				//printf("Point : (%i, %i)\n", x, y);
-
-				//std::cout << "iMax : " << iMax << " iMin : " << iMin << " jMin : " << jMin << " jMax : " << jMax << std::endl;
-
 				for(int i = iMin; i < iMax; i++){
 					for(int j = jMin; j < jMax; j++){
-						if(image.at<Vec3b>(i,j) != fond)
+						if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
+		                   && image.data[i*colonnes*3+j*3+1] == GREEN 
+		                   && image.data[i*colonnes*3+j*3+2] == RED))
 							count++;
 						if(count > requis)
 							break;
@@ -513,10 +516,11 @@ Mat lissageCouleur(Mat image, int nbrVoisin, int requis, Mat orig){
 					if(count > requis)
 						break;
 				}
-				//printf("\n");
 				count--;
 				if(count < requis){
-					retour.at<Vec3b>(x,y) = fond;
+					retour.data[x*colonnes*3+y*3+0] = BLUE;
+					retour.data[x*colonnes*3+y*3+1] = GREEN;
+					retour.data[x*colonnes*3+y*3+2] = RED;
 				}
 			}
 		}

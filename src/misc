@@ -338,4 +338,55 @@ int size = (temp->p_bd.x - temp->p_hg.x)*(temp->p_bd.y-temp->p_hg.y);
 //			std::cout<<"bl : "<<*it<<std::endl;
 //		}
 
+/**
+ * Lissage à utiliser uniquement sur une image traitée avec foregroundextraction
+ */
+Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 	
+	Mat retour(image.size(), image.type());
+	int count, total;
+	int colonnes = image.cols;
+	int lignes = image.rows;
+	int iMax, jMax, iMin, jMin;
+	Vec3b fond = Vec3b(BLUE, GREEN, RED);
+
+	for(int x = 0; x < lignes; x++){
+		for(int y = 0; y < colonnes; y++){
+			retour.at<Vec3b>(x, y) = image.at<Vec3b>(x, y);
+			if(image.at<Vec3b>(x,y) != fond){
+
+				count = 0;
+				total = 0;
+				iMax = x + nbrVoisin;
+				iMin = x - nbrVoisin;
+				jMax = y + nbrVoisin;
+				jMin = y - nbrVoisin;
+
+				if(iMin < 0)
+					iMin = nbrVoisin - x - nbrVoisin;
+				if(iMax >= lignes)
+					iMax = lignes - x;
+				if(jMin < 0)
+					jMin = nbrVoisin - y - nbrVoisin;
+				if(jMax >= colonnes)
+					jMax = colonnes - y;
+
+				for(int i = iMin; i < iMax; i++){
+					for(int j = jMin; j < jMax; j++){
+						if(image.at<Vec3b>(i,j) != fond)
+							count++;
+						if(count > requis)
+							break;
+					}
+					if(count > requis)
+						break;
+				}
+				count--;
+				if(count < requis){
+					retour.at<Vec3b>(x,y) = fond;
+				}
+			}
+		}
+	}
+	return retour;
+}

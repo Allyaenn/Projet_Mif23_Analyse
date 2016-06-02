@@ -89,23 +89,24 @@ bool Bloc::hasToBeSplitted(const Mat & image, const unsigned short int tabCarres
 		sum0 = sum1 = sum2 = 0;
 		int lignes = image.rows;
 		int colonnes = image.cols;
+		int pas = image.step;
 
 		for (int i = p_hg.y; i < p_bd.y; i++)
 		{
 			for (int j = p_hg.x; j < p_bd.x; j++)
 			{
-				if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
-				   && image.data[i*colonnes*3+j*3+1] == GREEN 
-				   && image.data[i*colonnes*3+j*3+2] == RED))
+				if (!(image.data[i*pas+j*3+0] == BLUE 
+				   && image.data[i*pas+j*3+1] == GREEN 
+				   && image.data[i*pas+j*3+2] == RED))
 				{
 					n++;
 					sum0 += tabCarres[i*colonnes*3+j*3+0];
 					sum1 += tabCarres[i*colonnes*3+j*3+1];
 					sum2 += tabCarres[i*colonnes*3+j*3+2];
 				
-					m0 += image.data[i*colonnes*3+j*3+0];
-					m1 += image.data[i*colonnes*3+j*3+1];
-					m2 += image.data[i*colonnes*3+j*3+2];
+					m0 += image.data[i*pas+j*3+0];
+					m1 += image.data[i*pas+j*3+1];
+					m2 += image.data[i*pas+j*3+2];
 				}
 			}
 		}

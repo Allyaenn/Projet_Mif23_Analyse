@@ -78,14 +78,15 @@ int main(int argc, char ** argv){
     while(c != 'q' && !frame.empty())
     {
     	start = steady_clock::now();
-        perso = spatialSmoothingGaussColor(frame, 1);
-       //	spatialSmoothingGauss(frame_NB,1);
-       perso = extractForegroundColor(background, perso);
+//    	perso = frame_NB;
+       	perso = spatialSmoothingGaussColor(frame, 1);
+       //perso = spatialSmoothingGauss(frame_NB,1);
+       	perso = extractForegroundColor(background, perso);
        // splitAndMerge(perso);
         //perso = extractForeground(bg_NB, frame_NB);
         //perso = frame;
         //perso = frame_NB;
-        imshow("Perso", perso);
+       // imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
 		lisse = preciseSmoothing(perso, 4, 28, frame);
@@ -95,8 +96,7 @@ int main(int argc, char ** argv){
         c = (char)waitKey(1);
         vcP >> frame;
     }
-
-
+    
 	namedWindow("Test", 1);
 
 	unsigned short int tabCarres [lisse.rows*lisse.cols*3];

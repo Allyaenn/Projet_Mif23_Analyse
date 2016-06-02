@@ -24,6 +24,7 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 	double h = 1.0/(pow(lambda,2));
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	int res0, res1, res2; //des int pour eviter le dépassement de capacité
 	int lambdasur2 = lambda/2;
 	int coordMin = -lambdasur2;
@@ -39,10 +40,10 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 			{
 				for (int v = coordMin; v <= coordMax; v++)
 				{	
-					res0 += image.data[(i+u)*colonnes+(j+v)];
+					res0 += image.data[(i+u)*pas+(j+v)];
 				}
 			} 
-			copie.data[i*colonnes+j] = (unsigned char)(res0 * h); //on repasse en char
+			copie.data[i*pas+j] = (unsigned char)(res0 * h); //on repasse en char
 		}
 	}
 	return copie;
@@ -58,6 +59,7 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 	double h = 1.0/(pow(lambda,2));
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	int res0, res1, res2;
 	int lambdasur2 = lambda/2;
 	int coordMin = -lambdasur2;
@@ -73,14 +75,14 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 			{
 				for (int v = coordMin; v <= coordMax; v++)
 				{
-					res0 += image.data[(i+u)*colonnes*3+(j+v)*3+0];
-					res1 += image.data[(i+u)*colonnes*3+(j+v)*3+1];
-					res2 += image.data[(i+u)*colonnes*3+(j+v)*3+2];
+					res0 += image.data[(i+u)*pas+(j+v)*3+0];
+					res1 += image.data[(i+u)*pas+(j+v)*3+1];
+					res2 += image.data[(i+u)*pas+(j+v)*3+2];
 				}
 			} 
-			copie.data[i*colonnes*3+j*3+0] = res0 * h;
-			copie.data[i*colonnes*3+j*3+1] = res1 * h;
-			copie.data[i*colonnes*3+j*3+2] = res2 * h;
+			copie.data[i*pas+j*3+0] = res0 * h;
+			copie.data[i*pas+j*3+1] = res1 * h;
+			copie.data[i*pas+j*3+2] = res2 * h;
 		}
 	}
 	return copie;
@@ -96,6 +98,7 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	double res;
 	const double pi = 3.14159265358979323846;
 	double coeff =  (1/(2*pi*pow(sigma,2)));
@@ -122,10 +125,10 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 					for (int v = -1; v < 2; v++)
 					{	
 						h = refu_v[(u+1)*3+(v+1)];
-						res += h*(image.data[(i+u)*colonnes+(j+v)]);
+						res += h*(image.data[(i+u)*pas+(j+v)]);
 					}
 				} 
-				copie.data[i*colonnes+j] = (unsigned char)(res);
+				copie.data[i*pas+j] = (unsigned char)(res);
 		}
 	}
 	return copie;	
@@ -140,6 +143,7 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	double res0, res1, res2;
 	const double pi = 3.14159265358979323846;
 	double coeff =  (1/(2*pi*pow(sigma,2)));
@@ -167,15 +171,15 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 					{	
 						h = refu_v[(u+1)*3+(v+1)];
 						//res += h*(image.data[(i+u)*colonnes+(j+v)]);
-						res0 += h * image.data[(i+u)*colonnes*3+(j+v)*3+0];
-						res1 += h * image.data[(i+u)*colonnes*3+(j+v)*3+1];
-						res2 += h * image.data[(i+u)*colonnes*3+(j+v)*3+2];
+						res0 += h * image.data[(i+u)*pas+(j+v)*3+0];
+						res1 += h * image.data[(i+u)*pas+(j+v)*3+1];
+						res2 += h * image.data[(i+u)*pas+(j+v)*3+2];
 					}
 				} 
 				//copie.data[i*colonnes+j] = (unsigned char)(res);
-				copie.data[i*colonnes*3+j*3+0] = (unsigned char) res0;
-				copie.data[i*colonnes*3+j*3+1] = (unsigned char) res1;
-				copie.data[i*colonnes*3+j*3+2] = (unsigned char) res2;
+				copie.data[i*pas+j*3+0] = (unsigned char) res0;
+				copie.data[i*pas+j*3+1] = (unsigned char) res1;
+				copie.data[i*pas+j*3+2] = (unsigned char) res2;
 		}
 	}
 	return copie;	
@@ -190,6 +194,7 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step; 
 	double res;
 	double h;
 	double coeff = pow(gamma, 2)/4;
@@ -214,10 +219,10 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 					for (int v = -1; v < 2; v++)
 					{	
 						h = refu_v[(u+1)*3+(v+1)];
-						res += h*(image.data[(i+u)*colonnes+(j+v)]);
+						res += h*(image.data[(i+u)*pas+(j+v)]);
 					}
 				} 
-				copie.data[i*colonnes+j] = (unsigned char)(res);
+				copie.data[i*pas+j] = (unsigned char)(res);
 		}
 	}
 	return copie;	
@@ -232,6 +237,7 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 	Mat copie = image.clone();
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	double res0, res1, res2;
 	double h;
 	double coeff = pow(gamma, 2)/4;
@@ -256,15 +262,15 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 					for (int v = -1; v < 2; v++)
 					{	
 						h = refu_v[(u+1)*3+(v+1)];
-						res0 += h * image.data[(i+u)*colonnes*3+(j+v)*3+0];
-						res1 += h * image.data[(i+u)*colonnes*3+(j+v)*3+1];
-						res2 += h * image.data[(i+u)*colonnes*3+(j+v)*3+2];
+						res0 += h * image.data[(i+u)*pas+(j+v)*3+0];
+						res1 += h * image.data[(i+u)*pas+(j+v)*3+1];
+						res2 += h * image.data[(i+u)*pas+(j+v)*3+2];
 					}
 				} 
 				
-				copie.data[i*colonnes*3+j*3+0] = (unsigned char) res0;
-				copie.data[i*colonnes*3+j*3+1] = (unsigned char) res1;
-				copie.data[i*colonnes*3+j*3+2] = (unsigned char) res2;
+				copie.data[i*pas+j*3+0] = (unsigned char) res0;
+				copie.data[i*pas+j*3+1] = (unsigned char) res1;
+				copie.data[i*pas+j*3+2] = (unsigned char) res2;
 		}
 	}
 	return copie;	
@@ -292,6 +298,7 @@ Mat temporalSmoothingColor(String filename){
     double res0, res1, res2;
     int lignes = background.rows;
     int colonnes = background.cols;
+    int pas = background.step;
 	
     /*
      * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
@@ -304,13 +311,13 @@ Mat temporalSmoothingColor(String filename){
             for (int u = 0; u < 10; u++)
             {
 				//res = res + (h*(stockage[u].at<Vec3b>(x, y)[k]));
-				res0 += stockage[u].data[x*colonnes*3+y*3+0];
-				res1 += stockage[u].data[x*colonnes*3+y*3+1];
-				res2 += stockage[u].data[x*colonnes*3+y*3+2];
+				res0 += stockage[u].data[x*pas+y*3+0];
+				res1 += stockage[u].data[x*pas+y*3+1];
+				res2 += stockage[u].data[x*pas+y*3+2];
             }
-            background.data[x*colonnes*3+y*3+0] = (unsigned char)(res0 * h);
-            background.data[x*colonnes*3+y*3+1] = (unsigned char)(res1 * h);
-            background.data[x*colonnes*3+y*3+2] = (unsigned char)(res2 * h);
+            background.data[x*pas+y*3+0] = (unsigned char)(res0 * h);
+            background.data[x*pas+y*3+1] = (unsigned char)(res1 * h);
+            background.data[x*pas+y*3+2] = (unsigned char)(res2 * h);
 
         }
     }
@@ -344,6 +351,7 @@ Mat temporalSmoothing(String filename){
     double res;
     int lignes = background.rows;
     int colonnes = background.cols;
+    int pas = background.step;
 	
     /*
      * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
@@ -355,9 +363,9 @@ Mat temporalSmoothing(String filename){
             res = 0;
             for (int u = 0; u < 10; u++)
             {
-				res += stockage[u].data[x*colonnes+y];
+				res += stockage[u].data[x*pas+y];
             }
-            background.data[x*colonnes+y] = (unsigned char)(res * h);
+            background.data[x*pas+y] = (unsigned char)(res * h);
 
         }
     }
@@ -379,6 +387,7 @@ Mat extractForegroundColor(const Mat & background, const Mat & frame){
     int seuil = 14;
     int lignes = frame.rows;
     int colonnes = frame.cols;
+    int pas = frame.step;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == lignes && background.cols == colonnes){
@@ -390,18 +399,18 @@ Mat extractForegroundColor(const Mat & background, const Mat & frame){
         for (int i = 0; i<lignes; i++){
             for (int j = 0; j<colonnes; j++){
             
-            	if(abs(frame.data[i*colonnes*3+j*3+0] - background.data[i*colonnes*3+j*3+0]) > seuil
-            	|| abs(frame.data[i*colonnes*3+j*3+1] - background.data[i*colonnes*3+j*3+1]) > seuil
-            	|| abs(frame.data[i*colonnes*3+j*3+2] - background.data[i*colonnes*3+j*3+2]) > seuil){
+            	if(abs(frame.data[i*pas+j*3+0] - background.data[i*pas+j*3+0]) > seuil
+            	|| abs(frame.data[i*pas+j*3+1] - background.data[i*pas+j*3+1]) > seuil
+            	|| abs(frame.data[i*pas+j*3+2] - background.data[i*pas+j*3+2]) > seuil){
 
-                    res.data[i*colonnes*3+j*3+0] = frame.data[i*colonnes*3+j*3+0];
-                    res.data[i*colonnes*3+j*3+1] = frame.data[i*colonnes*3+j*3+1];
-                    res.data[i*colonnes*3+j*3+2] = frame.data[i*colonnes*3+j*3+2];
+                    res.data[i*pas+j*3+0] = frame.data[i*pas+j*3+0];
+                    res.data[i*pas+j*3+1] = frame.data[i*pas+j*3+1];
+                    res.data[i*pas+j*3+2] = frame.data[i*pas+j*3+2];
 				}
                 else{
-                	res.data[i*colonnes*3+j*3+0] = BLUE;
-                    res.data[i*colonnes*3+j*3+1] = GREEN;
-                    res.data[i*colonnes*3+j*3+2] = RED;
+                	res.data[i*pas+j*3+0] = BLUE;
+                    res.data[i*pas+j*3+1] = GREEN;
+                    res.data[i*pas+j*3+2] = RED;
                     //opencv fonctionne en BGR et non en RGB
                 }
             }
@@ -426,6 +435,7 @@ Mat extractForeground(const Mat & background, const Mat & frame)
     int seuil = 25;
     int lignes = frame.rows;
     int colonnes = frame.cols;
+    int pas  = frame.step;
 	
     /*Vérification de la correspondance des dimensions*/
 	if (background.rows == lignes && background.cols == colonnes)
@@ -439,13 +449,13 @@ Mat extractForeground(const Mat & background, const Mat & frame)
             for (int j = 0; j<colonnes; j++)
             {
 
-                if(abs(frame.data[i*colonnes+j] - background.data[i*colonnes+j]) > seuil){
+                if(abs(frame.data[i*pas+j] - background.data[i*pas+j]) > seuil){
 
-                    res.data[i*colonnes+j] = frame.data[i*colonnes+j];
+                    res.data[i*pas+j] = frame.data[i*pas+j];
 
                 }
                 else{	
-                    res.data[i*colonnes+j] = GRAY;
+                    res.data[i*pas+j] = GRAY;
                 }
             }
         }
@@ -465,18 +475,19 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 	int count, total;
 	int colonnes = image.cols;
 	int lignes = image.rows;
+	int pas = image.step;
 	int iMax, jMax, iMin, jMin;
 	//Vec3b fond = Vec3b(BLUE, GREEN, RED);
 
 	for(int x = 0; x < lignes; x++){
 		for(int y = 0; y < colonnes; y++){
-			retour.data[x*colonnes*3+y*3+0] = image.data[x*colonnes*3+y*3+0];
-			retour.data[x*colonnes*3+y*3+1] = image.data[x*colonnes*3+y*3+1];
-			retour.data[x*colonnes*3+y*3+2] = image.data[x*colonnes*3+y*3+2];
+			retour.data[x*pas+y*3+0] = image.data[x*pas+y*3+0];
+			retour.data[x*pas+y*3+1] = image.data[x*pas+y*3+1];
+			retour.data[x*pas+y*3+2] = image.data[x*pas+y*3+2];
 			
-			if (!(image.data[x*colonnes*3+y*3+0] == BLUE 
-		       && image.data[x*colonnes*3+y*3+1] == GREEN 
-		       && image.data[x*colonnes*3+y*3+2] == RED))
+			if (!(image.data[x*pas+y*3+0] == BLUE 
+		       && image.data[x*pas+y*3+1] == GREEN 
+		       && image.data[x*pas+y*3+2] == RED))
 			{
 				count = 0;
 				total = 0;
@@ -496,9 +507,9 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 
 				for(int i = iMin; i < iMax; i++){
 					for(int j = jMin; j < jMax; j++){
-						if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
-		                   && image.data[i*colonnes*3+j*3+1] == GREEN 
-		                   && image.data[i*colonnes*3+j*3+2] == RED))
+						if (!(image.data[i*pas+j*3+0] == BLUE 
+		                   && image.data[i*pas+j*3+1] == GREEN 
+		                   && image.data[i*pas+j*3+2] == RED))
 							count++;
 						if(count > requis)
 							break;
@@ -508,9 +519,9 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 				}
 				count--;
 				if(count < requis){
-					retour.data[x*colonnes*3+y*3+0] = BLUE;
-					retour.data[x*colonnes*3+y*3+1] = GREEN;
-					retour.data[x*colonnes*3+y*3+2] = RED;
+					retour.data[x*pas+y*3+0] = BLUE;
+					retour.data[x*pas+y*3+1] = GREEN;
+					retour.data[x*pas+y*3+2] = RED;
 				}
 			}
 		}
@@ -528,6 +539,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	Mat copie = image.clone();
 	std::list<Bloc*> blocsATraiter;
 	std::list<Bloc*> blocsDefinitifs;
@@ -543,9 +555,9 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	{
 		for(int j = 0; j < colonnes; j++)
 		{
-			if (!(copie.data[i*colonnes*3+j*3+0] == BLUE 
-			   && copie.data[i*colonnes*3+j*3+1] == GREEN 
-			   && copie.data[i*colonnes*3+j*3+2] == RED))
+			if (!(copie.data[i*pas+j*3+0] == BLUE 
+			   && copie.data[i*pas+j*3+1] == GREEN 
+			   && copie.data[i*pas+j*3+2] == RED))
 			{
 				if (j>xmax)
 					xmax = j;
@@ -558,9 +570,9 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 					ymin = i;
 				
 				//on fait la modification préalable
-				tabCarres[i*colonnes*3+j*3+0] = (double)copie.data[i*colonnes*3+j*3+0] * (double)copie.data[i*colonnes*3+j*3+0];
-				tabCarres[i*colonnes*3+j*3+1] = (double)copie.data[i*colonnes*3+j*3+1] * (double)copie.data[i*colonnes*3+j*3+1];
-				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*colonnes*3+j*3+2] * (double)copie.data[i*colonnes*3+j*3+2];	
+				tabCarres[i*colonnes*3+j*3+0] = (double)copie.data[i*pas+j*3+0] * (double)copie.data[i*pas+j*3+0];
+				tabCarres[i*colonnes*3+j*3+1] = (double)copie.data[i*pas+j*3+1] * (double)copie.data[i*pas+j*3+1];
+				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*pas+j*3+2] * (double)copie.data[i*pas+j*3+2];	
 			}
 		}
 	}
@@ -688,6 +700,7 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 	start = steady_clock::now();
 	int lignes = image.rows;
 	int colonnes = image.cols;
+	int pas = image.step;
 	std::list<Region*> regionsDef;
 	std::list<Bloc*> voisins;
 	Region* regTemp;
@@ -751,13 +764,13 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 			{
 				for (int j = hg.x; j < bd.x; j++)
 				{
-					if (!(image.data[i*colonnes*3+j*3+0] == BLUE 
-				       && image.data[i*colonnes*3+j*3+1] == GREEN 
-				       && image.data[i*colonnes*3+j*3+2] == RED))
+					if (!(image.data[i*pas+j*3+0] == BLUE 
+				       && image.data[i*pas+j*3+1] == GREEN 
+				       && image.data[i*pas+j*3+2] == RED))
 					{
-						image.data[i*colonnes*3+j*3+0] = tabMoys[0];
-						image.data[i*colonnes*3+j*3+1] = tabMoys[1];
-						image.data[i*colonnes*3+j*3+2] = tabMoys[2];
+						image.data[i*pas+j*3+0] = tabMoys[0];
+						image.data[i*pas+j*3+1] = tabMoys[1];
+						image.data[i*pas+j*3+2] = tabMoys[2];
 					}
 				}
 			}

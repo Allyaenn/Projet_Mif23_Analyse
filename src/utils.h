@@ -26,81 +26,81 @@ void usage();
 void wrongFormat();
 
 /**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = moyenne
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = average
 */
 Mat spatialSmoothingAvg(const Mat & image, double lambda);
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = moyenne
+* Calcul of a spatial smoothing in a colored (3 canals) picture
+* kernel = average
 */
 Mat spatialSmoothingAvgColor(const Mat & image, double lambda);
 
 /**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = Gaussienne
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = Gaussian
 */
 Mat spatialSmoothingGauss(const Mat & image, double sigma);
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = Gaussienne
+* Calcul of a spatial smoothing in a colored picture
+* kernel = Gaussian
 */
 Mat spatialSmoothingGaussColor(const Mat & image, double sigma);
 
-/**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = Exponentielle
+/***
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = Exponential
 */
 Mat spatialSmoothingExp(const Mat & image, double gamma);
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = Exponentielle
+* Calcul of a spatial smoothing on a colored picture
+* kernel = Exponential
 */
 Mat spatialSmoothingExpColor(const Mat & image, double gamma);
 
 /**
- * Lissage temporel pour image couleur
+ * Temporal smoothing for a colored picture
  */
 Mat temporalSmoothingColor(String filename);
 
 /**
- * Lissage temporel pour image en niveau de gris
+ * Temporal smoothing for a greyscale picture
  */
 Mat temporalSmoothing(String filename);
 
 /**
- * Extrait les éléments mouvants de @frame (image en couleurs)
- * en comparant par rapport à  l'image de fond passée dans l'argument @Background
- * @backgound Matrice contenant l'image de fond
- * @frame Matrice contenant l'image complete
- * @return les éléments mouvants extraits de frame
+ * Extract the moving element of the @frame (colored picture)
+ * by comparing it to the @background picture
+ * @backgound picture of the background
+ * @frame picture to analyse
+ * @return a picture of the extracted foreground
  */
 Mat extractForegroundColor(const Mat & background, const Mat & frame);
 
 /**
- * Extrait les éléments mouvants de @frame (image en niveaux de gris)
- * en comparant par rapport à  l'image de fond passée dans l'argument @Background
- * @backgound Matrice contenant l'image de fond
- * @frame Matrice contenant l'image complete
- * @return les éléments mouvants extraits de frame
+ * Extract the moving element of the @frame (greyscale picture)
+ * by comparing it to the @background picture
+ * @backgound picture of the background
+ * @frame picture to analyse
+ * @return a picture of the extracted foreground
  */
 Mat extractForeground(const Mat & background, const Mat & frame);
 
 /**
- * Lissage post-extraction par rapport aux voisins du pixel considéré
+ * Post extraction smoothing with counting of extracted neighbours pixels
  */
 Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig);
 
 /**
-* Split de l'image en différents blocs
+* Split of the picture in different blocs
 */
 std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil);
 
 /**
-* Merge des blocs en différentes régions
+* Merge of the blocs in various regions
 */
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil);
 #endif

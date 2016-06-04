@@ -476,7 +476,8 @@ Mat extractForeground(const Mat & background, const Mat & frame)
  * Post extraction smoothing with counting of extracted neighbours pixels
  */
 Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
-	
+
+	/*Smoothed picture to be returned*/
 	Mat retour(image.size(), image.type());
 	int count, total;
 	int colonnes = image.cols;
@@ -485,23 +486,28 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 	int iMax, jMax, iMin, jMin;
 	//Vec3b fond = Vec3b(BLUE, GREEN, RED);
 
+	/*Examination of each pixel*/
 	for(int x = 0; x < lignes; x++){
 		for(int y = 0; y < colonnes; y++){
 			retour.data[x*pas+y*3+0] = image.data[x*pas+y*3+0];
 			retour.data[x*pas+y*3+1] = image.data[x*pas+y*3+1];
 			retour.data[x*pas+y*3+2] = image.data[x*pas+y*3+2];
 			
+			/*If the pixel is not green, the algorithm look further into its neigbourhood*/
 			if (!(image.data[x*pas+y*3+0] == BLUE 
 		       && image.data[x*pas+y*3+1] == GREEN 
 		       && image.data[x*pas+y*3+2] == RED))
 			{
 				count = 0;
 				total = 0;
+
+				/*Setting of the neighbourhood limits to look into*/
 				iMax = x + nbrVoisin;
 				iMin = x - nbrVoisin;
 				jMax = y + nbrVoisin;
 				jMin = y - nbrVoisin;
 
+				/*Specials cases, to avoid edge effect*/
 				if(iMin < 0)
 					iMin = nbrVoisin - x - nbrVoisin;
 				if(iMax >= lignes)
@@ -511,12 +517,15 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 				if(jMax >= colonnes)
 					jMax = colonnes - y;
 
+				/*Neigbours examination*/
 				for(int i = iMin; i < iMax; i++){
 					for(int j = jMin; j < jMax; j++){
+						/*If neighbour not green, then add one to counter*/
 						if (!(image.data[i*pas+j*3+0] == BLUE 
 		                   && image.data[i*pas+j*3+1] == GREEN 
 		                   && image.data[i*pas+j*3+2] == RED))
 							count++;
+						/*If the counter already has the number of required non-green pixels, exit the loop*/
 						if(count > requis)
 							break;
 					}
@@ -524,6 +533,7 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 						break;
 				}
 				count--;
+				/*If the counter is beneath the required number, the pixel is set to green*/
 				if(count < requis){
 					retour.data[x*pas+y*3+0] = BLUE;
 					retour.data[x*pas+y*3+1] = GREEN;

@@ -100,6 +100,8 @@ int main(int argc, char ** argv){
 	namedWindow("Test", 1);
 
 	unsigned short int tabCarres [lisse.rows*lisse.cols*3];
+	for (int i = 0; i<lisse.rows*lisse.cols*3; i++)
+		tabCarres[i] = 0;
     std::list<Bloc*> blocs = split(lisse, tabCarres, 500);
     merge(blocs, lisse, tabCarres, 10000);
     char d;

@@ -526,7 +526,7 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 /**
 * Merge of the blocs in various regions
 */
-std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil )
+std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double seuil )
 {
 	steady_clock::time_point start, end;
 	start = steady_clock::now();
@@ -663,20 +663,12 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 		}
 	}
 	
-	//affichage du résultat du split (destiné à disparaitre)
-	
-//	auto itBloc = blocsDefinitifs.begin();
-//	for (int i = 0; i<57; i++)
-//		itBloc++;
-//	rectangle(image, Point((*itBloc)->p_hg.x,(*itBloc)->p_hg.y), Point ((*itBloc)->p_bd.x,(*itBloc)->p_bd.y), CV_RGB(255,0,0),CV_FILLED);
-//	for(auto it = (*itBloc)->getVoisins().begin(); it != (*itBloc)->getVoisins().end(); it++)
-//	{
-//		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), CV_RGB(0,0,255),CV_FILLED);
-//	}
-//	
+		//affichage du résultat du split (destiné à disparaitre)	
 //	for(auto it = blocsDefinitifs.begin(); it != blocsDefinitifs.end(); it++)
 //	{
-//		rectangle(image, Point((*it)->p_hg.x,(*it)->p_hg.y), Point ((*it)->p_bd.x,(*it)->p_bd.y), 1);
+//		pixel hg = (*it)->getP_hg();
+//		pixel bd = (*it)->getP_bd();
+//		rectangle(image, Point(hg.x,hg.y), Point (bd.x,bd.y), 1);
 //	}
 
 	end = steady_clock::now();
@@ -687,7 +679,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 /**
 * Merge of the blocs in various regions
 */
-std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil)
+std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int* tabCarres , double seuil)
 {
 	std::list<Bloc*> blocsLibres = blocs;
 	steady_clock::time_point start, end;
@@ -773,4 +765,65 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 	end = steady_clock::now();
 	std::cout<<"time merge : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
 	return regionsDef;
+}
+
+/**
+* Coloring the regions depending on their color on the image
+* The aim of this fonction is to realize the bodypart segmentation
+*/
+void detectBodyParts(const std::list<Region*> regions, const Mat & image){
+	
+	int lignes = image.rows;
+	int colonnes = image.cols;
+	int pas = image.step;
+	double * tabMoys;
+	for (auto itReg = regions.begin(); itReg != regions.end(); itReg++)
+	{
+		tabMoys = (*itReg)->getMoy();
+		if (tabMoys[0] >= 54 && tabMoys[0] <= 137 && tabMoys[1] >= 67 && tabMoys[1] <= 138 && tabMoys[2] >= 72 && tabMoys[2] <= 145){
+			
+			for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
+			{
+				pixel hg = (*itBloc)->getP_hg();
+				pixel bd = (*itBloc)->getP_bd();
+				for (int i = hg.y; i < bd.y; i++)
+				{
+					for (int j = hg.x; j < bd.x; j++)
+					{
+						if (!(image.data[i*pas+j*3+0] == BLUE 
+						   && image.data[i*pas+j*3+1] == GREEN 
+						   && image.data[i*pas+j*3+2] == RED))
+						{
+							image.data[i*pas+j*3+0] = 255;
+							image.data[i*pas+j*3+1] = 255;
+							image.data[i*pas+j*3+2] = 255;
+						}
+					}
+				}
+			}
+		}
+		
+		if (tabMoys[0] >= 12 && tabMoys[0] <= 54 && tabMoys[1] >= 26 && tabMoys[1] <= 79 && tabMoys[2] >= 29 && tabMoys[2] <= 86){
+		
+			for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
+			{
+				pixel hg = (*itBloc)->getP_hg();
+				pixel bd = (*itBloc)->getP_bd();
+				for (int i = hg.y; i < bd.y; i++)
+				{
+					for (int j = hg.x; j < bd.x; j++)
+					{
+						if (!(image.data[i*pas+j*3+0] == BLUE 
+						   && image.data[i*pas+j*3+1] == GREEN 
+						   && image.data[i*pas+j*3+2] == RED))
+						{
+							image.data[i*pas+j*3+0] = 255;
+							image.data[i*pas+j*3+1] = 0;
+							image.data[i*pas+j*3+2] = 0;
+						}
+					}
+				}
+			}
+		}
+	}
 }

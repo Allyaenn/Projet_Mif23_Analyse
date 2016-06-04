@@ -106,5 +106,11 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 * Merge of the blocs in various regions
 */
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil);
+/**
+* Coloring of pixels depending on their color
+* The aim of this fonction is to realize the bodypart segmentation
+*/
+void detectBodyParts(const std::list<Region*> regions, const Mat & image);
+
 #endif
 

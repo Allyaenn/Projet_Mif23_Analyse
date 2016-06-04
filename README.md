@@ -34,10 +34,9 @@ Pour compiler le programme :
 Pour lancer le programme :
 	* Lancer la commande :
 		* ./Analyse Data/BG-camera-01.avi Data/ACQ-camera-01.avi 
-		
-	L'extraction de l'avant-plan va s'afficher dans une fenêtre, frame par frame.
-	En appuyant sur 'q', l'image en cours d'affichage sera segmentée et le resultat
-	sera affiché dans une nouvelle fenêtre.
-	Appuyer une fois sur 'q' pour quitter le programme.
+	* L'extraction de l'avant-plan va s'afficher dans une fenêtre, frame par frame.
+	* En appuyant sur 'q', l'image en cours d'affichage sera segmentée et le resultat
+	  sera affiché dans une nouvelle fenêtre.
+	* Appuyer une fois sur 'q' pour quitter le programme.
 
 

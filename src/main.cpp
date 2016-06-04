@@ -59,32 +59,32 @@ int main(int argc, char ** argv){
     vcP >> frame;
 
 	// spatial smoothing of the background
-	background = spatialSmoothingGaussColor(background, 1);
+	background = spatialSmoothingExpColor(background, 1);
 	
     char c;
     c = (char)waitKey(1);
     while(c != 'q' && !frame.empty())
     {
-       	image = spatialSmoothingGaussColor(frame, 1);
+       	image = spatialSmoothingExpColor(frame, 1);
        	image = extractForegroundColor(background, image);
 		image = preciseSmoothing(image, 4, 28);
 		imshow("Extracted Forgeround", image);
         c = (char)waitKey(1);
-        vcP >> frame;
+        //vcP >> frame;
     }
     
 	unsigned short int tabCarres [image.rows*image.cols*3];
 	for (int i = 0; i<image.rows*image.cols*3; i++)
 		tabCarres[i] = 0;
-    std::list<Bloc*> blocs = split(image, tabCarres, 500);
-    merge(blocs, image, tabCarres, 10000);
-    char d;
-    d = (char)waitKey(1);
+    std::list<Bloc*> blocs = split(image, tabCarres, 400);
+    std::list<Region*> regions =  merge(blocs, image, tabCarres, 10000);
+    c = (char)waitKey(1);
     namedWindow("Segmented Image", 1);
-    while(d != 'q')
+    while(c != 'q')
     {
    		 imshow("Segmented Image", image);
-   		 d = (char)waitKey(1);
+   		 //detectBodyParts(regions, image);
+   		 c = (char)waitKey(1);
    	}
    	
 	return EXIT_SUCCESS;

@@ -92,7 +92,7 @@ bool Bloc::estVoisin(const Bloc & b){
 
 }
 		
-bool Bloc::hasToBeSplitted(const Mat & image, const unsigned short int tabCarres [], double seuil){
+bool Bloc::hasToBeSplit(const Mat & image, const unsigned short int tabCarres [], double seuil){
 	//calculation of the bloc size
 	int size = (p_bd.x - p_hg.x)*(p_bd.y-p_hg.y);
 	if(size>25) // if the bloc is big enough
@@ -140,6 +140,8 @@ bool Bloc::hasToBeSplitted(const Mat & image, const unsigned short int tabCarres
 			varB = abs((sum0/n) - pow(m0,2));
 			varG = abs((sum1/n) - pow(m1,2));
 			varR = abs((sum2/n) - pow(m2,2));
+			
+			nb_pixels = n;
 		}
 	
 		// if one of the variances is above a certain threshold, the bloc has to be splitted

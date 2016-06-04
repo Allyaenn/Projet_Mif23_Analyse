@@ -600,7 +600,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
   	{
   		temp = blocsATraiter.front(); //getting the bloc we will work on
 		
-		if (temp->hasToBeSplitted(image, tabCarres, seuil)) //if the bloc has to be splitted
+		if (temp->hasToBeSplit(image, tabCarres, seuil)) //if the bloc has to be split
 		{
 			/*Split of the bloc in 4*/
 			int nvX, nvY;
@@ -690,14 +690,14 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 			blocsDefinitifs.push_back(temp);
 		}
 	}
+
+	//	for(auto it = blocsDefinitifs.begin(); it != blocsDefinitifs.end(); it++)
+	//	{
+	//		pixel hg = (*it)->getP_hg();
+	//		pixel bd = (*it)->getP_bd();
+	//		rectangle(image, Point(hg.x,hg.y), Point (bd.x,bd.y), 1);
+	//	}
 	
-		//affichage du résultat du split (destiné à disparaitre)	
-//	for(auto it = blocsDefinitifs.begin(); it != blocsDefinitifs.end(); it++)
-//	{
-//		pixel hg = (*it)->getP_hg();
-//		pixel bd = (*it)->getP_bd();
-//		rectangle(image, Point(hg.x,hg.y), Point (bd.x,bd.y), 1);
-//	}
 	return blocsDefinitifs;
 }
 

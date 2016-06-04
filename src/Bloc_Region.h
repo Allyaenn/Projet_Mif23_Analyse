@@ -90,7 +90,7 @@ class Bloc{
 		* The segementation criteria is the variance of the value (for each color) of each pixel 
 		* in the picture
 		*/
-		bool hasToBeSplitted(const Mat & image, const unsigned short int tabCarres [], double seuil);
+		bool hasToBeSplit(const Mat & image, const unsigned short int tabCarres [], double seuil);
 
 };
 

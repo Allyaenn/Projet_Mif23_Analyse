@@ -77,7 +77,7 @@ int main(int argc, char ** argv){
 	for (int i = 0; i<image.rows*image.cols*3; i++)
 		tabCarres[i] = 0;
     std::list<Bloc*> blocs = split(image, tabCarres, 400);
-    std::list<Region*> regions =  merge(blocs, image, tabCarres, 10000);
+    std::list<Region*> regions =  merge(blocs, image, tabCarres, 1000);
     c = (char)waitKey(1);
     namedWindow("Segmented Image", 1);
     while(c != 'q')

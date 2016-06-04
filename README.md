@@ -21,8 +21,8 @@ GONNOT Alix 11206213
 			sudo apt-get install libcv-dev libcvaux-dev libhighgui-dev
 
 ## Compilation
-L'archive doit contenir ce README, un dossier src, un dossier Data et un fichier CMakeLists.txt
-Pour compiler le programme :
+* L'archive doit contenir ce README, un dossier src, un dossier Data et un fichier CMakeLists.txt
+* Pour compiler le programme :
 	* Extrayez l'archive
 	* Dans un terminal, déplacez vous dans le dossier contenant les éléments extraits de l'archive
 	* lancez les commandes :
@@ -31,7 +31,7 @@ Pour compiler le programme :
 		3. make
 
 ## Éxécution
-Pour lancer le programme :
+* Pour lancer le programme :
 	* Lancer la commande :
 		* ./Analyse Data/BG-camera-01.avi Data/ACQ-camera-01.avi 
 	* L'extraction de l'avant-plan va s'afficher dans une fenêtre, frame par frame.

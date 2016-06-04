@@ -484,7 +484,6 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 	int lignes = image.rows;
 	int pas = image.step;
 	int iMax, jMax, iMin, jMin;
-	//Vec3b fond = Vec3b(BLUE, GREEN, RED);
 
 	/*Examination of each pixel*/
 	for(int x = 0; x < lignes; x++){

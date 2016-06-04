@@ -1,22 +1,21 @@
 #include "utils.h"
 
 /**
- * Message d'erreur en cas de mauvais appel au programme
+ * Usage of the program
  */
 void usage(){
 	cout << "Error : expected usage" << endl << "./Analyse <video>" << endl;
 }
 
 /**
- * Message d'erreur en cas de mauvaises dimensions
- */
-void wrongFormat(){
+ * Wrong size of a picture
+ */void wrongFormat(){
 	std::cout<<"Error  : wrong size for used pictures, they have to be of equal sizes"<<std::endl;
 }
 
 /**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = moyenne
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = average
 */
 Mat spatialSmoothingAvg(const Mat & image, double lambda)
 {
@@ -25,7 +24,8 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int pas = image.step;
-	int res0, res1, res2; //des int pour eviter le dépassement de capacité
+	/*Integers are used to prevent overflow*/
+	int res0, res1, res2;
 	int lambdasur2 = lambda/2;
 	int coordMin = -lambdasur2;
 	int coordMax = lambdasur2;
@@ -34,7 +34,7 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 	{
 		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
-			//calcul de la convolution pour chaque composante couleur
+			/*Calculation of the convolution for each color element*/
 			res0 = res1 = res2 = 0;
 			for (int u = coordMin; u <= coordMax; u++)
 			{
@@ -42,16 +42,17 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 				{	
 					res0 += image.data[(i+u)*pas+(j+v)];
 				}
-			} 
-			copie.data[i*pas+j] = (unsigned char)(res0 * h); //on repasse en char
+			}
+			/*Data is switched back to characters*/
+			copie.data[i*pas+j] = (unsigned char)(res0 * h);
 		}
 	}
 	return copie;
 }
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = moyenne
+* Calcul of a spatial smoothing in a colored (3 canals) picture
+* kernel = average
 */
 Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 {
@@ -69,7 +70,7 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 	{
 		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
-			//calcul de la convolution pour chaque composante couleur
+			/*Calculation of the convolution for each color element*/
 			res0 = res1 = res2 = 0;
 			for (int u = coordMin; u <= coordMax; u++)
 			{
@@ -90,8 +91,8 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 
 
 /**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = Gaussienne
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = Gaussian
 */
 Mat spatialSmoothingGauss(const Mat & image, double sigma)
 {
@@ -135,8 +136,8 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 }
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = Gaussienne
+* Calcul of a spatial smoothing in a colored picture (3 canals)
+* kernel = Gaussian
 */
 Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 {
@@ -185,9 +186,9 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 	return copie;	
 }
 
-/**
-* Calcul d'un lissage spatial sur une image en niveaux de gris (1 canal)
-* noyau = Exponentielle
+/***
+* Calcul of a spatial smoothing on a greyscale picture
+* kernel = Exponential
 */
 Mat spatialSmoothingExp(const Mat & image, double gamma)
 {
@@ -229,8 +230,8 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 }
 
 /**
-* Calcul d'un lissage spatial sur une image couleur (3 canaux)
-* noyau = Exponentielle
+* Calcul of a spatial smoothing on a colored picture
+* kernel = Exponential
 */
 Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 {
@@ -277,18 +278,18 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 }
 
 /**
- * Lissage temporel pour image couleur
+ * Temporal smoothing for a colored picture
  */
 Mat temporalSmoothingColor(String filename){
 
-    /*Résultat à renvoyer*/
+    /*Results to to return*/
     Mat background;
-    /*Ensemble des 10 premières frames de la vidéos*/
+    /*First ten pictures of the video*/
     Mat stockage[10];
     /** Video*/
     VideoCapture vc = VideoCapture(filename);
 
-    /*Récupération des dix premières images*/
+    /*Acquiring the ten pictures*/
     for(int i = 0; i< 10; i++){
         vc >> stockage[i];
     }
@@ -300,10 +301,7 @@ Mat temporalSmoothingColor(String filename){
     int colonnes = background.cols;
     int pas = background.step;
 	
-    /*
-     * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
-     * respectifs de chaque image
-     */
+    /*Creation of a picture where each pixel is the average value of the matching pixel in the ten pictures*/ 
     for(int x = 0; x < lignes; x++){
         for(int y = 0; y < colonnes; y ++){
 
@@ -327,23 +325,24 @@ Mat temporalSmoothingColor(String filename){
 }
 
 /**
- * Lissage temporel pour image en niveau de gris
+ * Temporal smoothing for a greyscale picture
  */
 Mat temporalSmoothing(String filename){
 
-    /*Résultat à renvoyer*/
+    /*Results to to return*/
     Mat background;
-    /*Ensemble des 10 premières frames de la vidéos*/
+    /*First ten pictures of the video*/
     Mat stockage[10];
     
     Mat temp;
     /** Video*/
     VideoCapture vc = VideoCapture(filename);
 
-    /*Récupération des dix premières images*/
+    /*Acquiring the ten pictures*/
     for(int i = 0; i< 10; i++){
         vc >> temp;
-        cvtColor(temp, stockage[i], CV_BGR2GRAY); //passage de couleur en niveau de gris
+		/*Switching from a colored picture to a greyscale one*/
+        cvtColor(temp, stockage[i], CV_BGR2GRAY);
     }
     background = Mat(stockage[0].size(), stockage[0].type());
 	
@@ -353,10 +352,7 @@ Mat temporalSmoothing(String filename){
     int colonnes = background.cols;
     int pas = background.step;
 	
-    /*
-     * Création d'une image dont chaque pixel correspond à la moyenne des 10 pixels
-     * respectifs de chaque image
-     */
+    /*Creation of a picture where each pixel is the average value of the matching pixel in the ten pictures*/ 
     for(int x = 0; x < lignes; x++){
         for(int y = 0; y < colonnes; y ++){
 
@@ -376,11 +372,11 @@ Mat temporalSmoothing(String filename){
 
 
 /**
- * Extrait les éléments mouvants de @frame (image en couleurs)
- * en comparant par rapport à  l'image de fond passée dans l'argument @Background
- * @backgound Matrice contenant l'image de fond
- * @frame Matrice contenant l'image complete
- * @return les éléments mouvants extraits de frame
+ * Extract the moving element of the @frame (colored picture)
+ * by comparing it to the @background picture
+ * @backgound picture of the background
+ * @frame picture to analyse
+ * @return a picture of the extracted foreground
  */
 Mat extractForegroundColor(const Mat & background, const Mat & frame){
     Mat res;
@@ -389,14 +385,13 @@ Mat extractForegroundColor(const Mat & background, const Mat & frame){
     int colonnes = frame.cols;
     int pas = frame.step;
 	
-    /*Vérification de la correspondance des dimensions*/
+    /*Control of the similarity of the picture size*/
 	if (background.rows == lignes && background.cols == colonnes){
         
         res = Mat(frame.size(), frame.type());
 
-        /*comparaison de l'image avec l'arrière-plan
-        et construction d'une image où les différences apparaissent*/
-        for (int i = 0; i<lignes; i++){
+		/*Comparaison of the @frame with the @background and creation of the extract object in a picture*/
+		for (int i = 0; i<lignes; i++){
             for (int j = 0; j<colonnes; j++){
             
             	if(abs(frame.data[i*pas+j*3+0] - background.data[i*pas+j*3+0]) > seuil
@@ -423,11 +418,11 @@ Mat extractForegroundColor(const Mat & background, const Mat & frame){
 }
 
 /**
- * Extrait les éléments mouvants de @frame (image en niveaux de gris)
- * en comparant par rapport à  l'image de fond passée dans l'argument @Background
- * @backgound Matrice contenant l'image de fond
- * @frame Matrice contenant l'image complete
- * @return les éléments mouvants extraits de frame
+ * Extract the moving element of the @frame (greyscale picture)
+ * by comparing it to the @background picture
+ * @backgound picture of the background
+ * @frame picture to analyse
+ * @return a picture of the extracted foreground
  */
 Mat extractForeground(const Mat & background, const Mat & frame)
 {
@@ -437,13 +432,12 @@ Mat extractForeground(const Mat & background, const Mat & frame)
     int colonnes = frame.cols;
     int pas  = frame.step;
 	
-    /*Vérification de la correspondance des dimensions*/
+    /*Control of the similarity of the picture size*/
 	if (background.rows == lignes && background.cols == colonnes)
 	{
         res = Mat(frame.size(), frame.type());
 
-        /*comparaison de l'image avec l'arrière-plan
-        et construction d'une image où les différences apparaissent*/
+        /*Comparaison of the @frame with the @background and creation of the extract object in a picture*/
         for (int i = 0; i<lignes; i++)
         {
             for (int j = 0; j<colonnes; j++)
@@ -467,9 +461,9 @@ Mat extractForeground(const Mat & background, const Mat & frame)
 }
 
 /**
- * Lissage post-extraction par rapport aux voisins du pixel considéré
+ * Post extraction smoothing with counting of extracted neighbours pixels
  */
-Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
+Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 	
 	Mat retour(image.size(), image.type());
 	int count, total;
@@ -530,7 +524,7 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig){
 }
 
 /**
-* Split de l'image en différents blocs
+* Merge of the blocs in various regions
 */
 std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil )
 {
@@ -585,7 +579,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 		
 		if (temp->hasToBeSplitted(image, tabCarres, seuil))
 		{
-			//séparation du bloc en 4
+			/*Split of the bloc in 4*/
 			int nvX, nvY;
 			pixel hg = temp->getP_hg();
 			pixel bd = temp->getP_bd();
@@ -600,11 +594,11 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 	
 			Bloc* bloc4  = new Bloc(pixel(nvX+hg.x+1, nvY+hg.y+1), pixel(bd.x, bd.y)); //OK
 	
-			//répartion des vosins du bloc d'origine
+			/*Distribution of the neighbours of the bloc*/
 	
 			for (auto itv = temp->getVoisins().begin(); itv != temp->getVoisins().end(); itv++)
 			{
-				//supression du bloc principal en tant que voisin chez ses propres  voisins
+				/*Removal of the main bloc as a neighbour of his own neighbours*/
 				for (auto it2 = (*itv)->getVoisins().begin(); it2 != (*itv)->getVoisins().end(); it2++)
 				{
 					if (*temp == **it2)
@@ -635,7 +629,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 				}
 			}
 		
-			//insertion des nouveaux blocs dans les listes de voisins
+			/*Insertion of the new blocs in the neigbours list*/
 			bloc1->getVoisins().push_back(bloc2);
 			bloc1->getVoisins().push_back(bloc3);
 			bloc1->getVoisins().push_back(bloc4);
@@ -652,10 +646,10 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 			bloc4->getVoisins().push_back(bloc2);
 			bloc4->getVoisins().push_back(bloc3);
 			
-			//suppression de l'ancien bloc
+			/*Removal of the old bloc*/
 			blocsATraiter.pop_front();
 		
-			//insertion des nouveaux blocs dans la listes
+			/*Insertion of the new bloc in the list*/
 			blocsATraiter.push_back(bloc1);
 			blocsATraiter.push_back(bloc2);
 			blocsATraiter.push_back(bloc3);
@@ -691,7 +685,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], doubl
 }
 
 /**
-* Merge des blocs en différentes régions
+* Merge of the blocs in various regions
 */
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil)
 {
@@ -707,17 +701,17 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 	Bloc* blocTemp;
 	Bloc* blocVois;
 	
-	//blocs contient les blocs "libres" (qui n'appartiennent pas déjà à une région)
+	/*Blocs contain the "free" blocs, who don't belongs to a region*/
 	while (!blocsLibres.empty())
 	{
-		//création d'une nouvelle région
+		/*Creation of a new region*/
 		blocTemp = blocsLibres.front();
 		blocsLibres.pop_front();
 		regTemp = new Region();
 		regTemp->addBloc(blocTemp);
 		regTemp->updateVar(image, tabCarres);
 		voisins.insert(voisins.end(), blocTemp->getVoisins().begin(), blocTemp->getVoisins().end());
-		//parcours des voisins de la région (c'est à dire les voisins libres des blocs constituant la région)
+		/*process of the neighbours of the region (the free neigbours who are in the region)*/
 
 		while(!voisins.empty())
 		{

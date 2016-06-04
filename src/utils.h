@@ -23,6 +23,9 @@ using namespace chrono;
  */
 void usage();
 
+/**
+ * Wrong size of a picture
+ */
 void wrongFormat();
 
 /**
@@ -92,7 +95,7 @@ Mat extractForeground(const Mat & background, const Mat & frame);
 /**
  * Post extraction smoothing with counting of extracted neighbours pixels
  */
-Mat preciseSmoothing(Mat image, int nbrVoisin, int requis, Mat orig);
+Mat preciseSmoothing(Mat image, int nbrVoisin, int requis);
 
 /**
 * Split of the picture in different blocs

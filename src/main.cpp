@@ -89,7 +89,7 @@ int main(int argc, char ** argv){
        // imshow("Perso", perso);
 //        imshow("Background", background);
 //        imshow("Background_non_lissée", background2);
-		lisse = preciseSmoothing(perso, 4, 28, frame);
+		lisse = preciseSmoothing(perso, 4, 28);
 		imshow("Lisse", lisse);
         end = steady_clock::now();
         std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;

@@ -98,14 +98,15 @@ Mat extractForeground(const Mat & background, const Mat & frame);
 Mat preciseSmoothing(Mat image, int nbrVoisin, int requis);
 
 /**
-* Split of the picture in different blocs
+* Split the picture in different blocs (first part of the Split and Merge method)
 */
 std::list<Bloc*> split(const Mat & image, unsigned short int tabCarres [], double seuil);
 
 /**
-* Merge of the blocs in various regions
+* Merge the blocs in several regions (second part of the Split and Merge method)
 */
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int tabCarres [], double seuil);
+
 /**
 * Coloring of pixels depending on their color
 * The aim of this fonction is to realize the bodypart segmentation

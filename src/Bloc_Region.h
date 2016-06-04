@@ -19,8 +19,8 @@ using namespace std;
 using namespace chrono;
 
 struct pixel {
-	int x; //coordonnées x du pixel
-	int y; //coordonnées y du pixel
+	int x; //x coordinate of the pixel (column)
+	int y; //y coordinate of the pixel (line)
 	
 	pixel(){} 
 	pixel(int i, int j) : x(i), y(j) {} 
@@ -30,57 +30,65 @@ class Bloc{
 
 	private : 
 	
-		 pixel p_hg; // représente le pixel en haut a gauche du bloc (comportant xmin et ymin)
-		 pixel p_bd; // représente le pixel en bas a droite du bloc (comportant xmax et ymax)
-		 int nb_pixels; // donne le nombre de pixels stockés dans la région (les pixels de l'arrière plan ne sont pas pris en compte)
-		 double varB; // la variance pour le canal BLUE
-		 double varG; // la variance pour le canal GREEN
-		 double varR; // la variance pour le canal RED
-		 std::list<Bloc*> voisins; // les voisins
+		 pixel p_hg; // top-left pixel of the bloc
+		 pixel p_bd; // bottom-right pixel of the bloc
+		 int nb_pixels; // number of pixels stored in the bloc (without background pixels)
+		 double varB; // BLUE canal variance
+		 double varG; // GREEN canal variance
+		 double varR; // RED canal variance
+		 std::list<Bloc*> voisins; // neighbours (8-connected)
 
 	public :
 	 
 		/**
-		* Constructeur par défaut
+		* Default constructor
 		*/
 		Bloc();
 		
 		/**
-		* Constructeur avec 3 paramètres
+		* Constructor with 3 parameters
 		*/
 		Bloc(pixel hg, pixel bd, std::list<Bloc*> v);
 		
 		/**
-		* Constructeur avec 2 paramètres
+		* Constructor with 2 parameters
 		*/
 		Bloc(pixel hg, pixel bd);
 		
 		/**
-		* Getter sur la liste des voisins
+		* Getter on neighbours list
 		*/
 		std::list<Bloc*> & getVoisins();
 		
+		/**
+		* Getter on top-left pixel
+		*/
 		const pixel & getP_hg();
 		
+		/**
+		* Getter on bottom-right pixel
+		*/
 		const pixel & getP_bd();
 		
+		/**
+		* Getter on variances
+		*/
 		double * getVar();
 		
 		/**
-		* Surcharge de l'opérateur d'égalité 
+		* Override of equality operator
 		*/
 		bool operator==(const Bloc & b);
 		
 		/**
-		* Fonction permettant de determiner si le bloc b et le bloc courant sont voisins 
-		* vis à vis de leur coordonnées
+		* Function which goal is to determine wether th bloc b and the current bloc are neighbours or not
 		*/
 		bool estVoisin(const Bloc & b);
 		
 		/**
-		* Fonction qui détermine si le bloc doit être divisé en 4 ou non.
-		* Le critère de segmentation est la variance de la valeur pour chaque pixel du bloc, 
-		* elle est calculée pour chaque canal de l'image.
+		* Function which goal is to determine if the current bloc has to be splitted
+		* The segementation criteria is the variance of the value (for each color) of each pixel 
+		* in the picture
 		*/
 		bool hasToBeSplitted(const Mat & image, const unsigned short int tabCarres [], double seuil);
 
@@ -89,45 +97,48 @@ class Bloc{
 class Region {
 
 	private : 
-		std::list<Bloc*> blocs; // les blocs composant la région
-		double varB; // la variance pour le canal BLUE
-		double varG; // la variance pour le canal GREEN
-		double varR; // la variance pour le canal RED
+		std::list<Bloc*> blocs; // blocs composing the region
+		double varB; // BLUE canal variance
+		double varG; // GREEN canal variance
+		double varR; // RED canal variance
 		
-		double moyB; // la moyenne pour le canal BLUE
-		double moyG; // la moyenne pour le canal GREEN
-		double moyR; // la moyenne pour le canal RED
+		double moyB; // BLUE canal mean
+		double moyG; // GREEN canal mean
+		double moyR; // RED canal mean
 		
 	public : 
 	
 		/**
-		* Constructeur par défaut
+		* Default constructor
 		*/
 		Region();
 		
 		/**
-		* Fonction permettant d'ajouter un bloc dans une région
+		* Function adding a bloc in the region
 		*/
 		void addBloc(Bloc * b);
 		
 		/**
-		* Getter sur la liste des blocs composant une région
+		* Getter on blocs list
 		*/
 		const std::list<Bloc*> & getBlocs();
 		
 		/**
-		* Getter sur les moyennes des valeur des pixels de la région
+		* Getter on the means
 		*/
 		double * getMoy(); 
 		
 		/**
-		* Fonction permettant de mettre à jour les variances et moyennes de la région
+		* Function which goal is to update the variances stored in the current region
+		* according to the blocs composing it
 		*/
 		void updateVar(const Mat & image, const unsigned short int tabCarres []);
 		
 		/**
-		* Fonction permettant de determiner si l'union d'un bloc et d'une région
-		* résulte en une nouvelle région homogène ou non
+		* Function which goal is to determine if the union between the current region and 
+		* the bloc b results in an homogeneous region.
+		* The fusion criteria is the difference between the variance of the region and of the bloc 
+		* (for each canal). It has to be beneath the "seuil" (threshold).
 		*/
 		bool isConsistent(Bloc & b, double seuil);
 		

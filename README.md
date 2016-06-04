@@ -30,7 +30,7 @@ GONNOT Alix 11206213
 		2. make clean
 		3. make
 
-## Éxécution
+## Exécution
 * Pour lancer le programme :
 	* Lancer la commande :
 		* ./Analyse Data/BG-camera-01.avi Data/ACQ-camera-01.avi 

@@ -14,7 +14,7 @@ void usage(){
 }
 
 /**
-* Calcul of a spatial smoothing on a greyscale picture
+* Calcul of a spatial smoothing on a grayscale picture
 * kernel = average
 */
 Mat spatialSmoothingAvg(const Mat & image, double lambda)
@@ -24,7 +24,6 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int pas = image.step;
-	/*Integers are used to prevent overflow*/
 	int res0, res1, res2;
 	int lambdasur2 = lambda/2;
 	int coordMin = -lambdasur2;
@@ -34,16 +33,17 @@ Mat spatialSmoothingAvg(const Mat & image, double lambda)
 	{
 		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
-			/*Calculation of the convolution for each color element*/
+			/*Calculation of the convolution for each canal*/
 			res0 = res1 = res2 = 0;
 			for (int u = coordMin; u <= coordMax; u++)
 			{
 				for (int v = coordMin; v <= coordMax; v++)
 				{	
+					//sum of all neighbours value
 					res0 += image.data[(i+u)*pas+(j+v)];
 				}
 			}
-			/*Data is switched back to characters*/
+			//multiplication by h = (1/lambda²) to achieve mean calculation
 			copie.data[i*pas+j] = (unsigned char)(res0 * h);
 		}
 	}
@@ -70,17 +70,19 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 	{
 		for(int j = lambdasur2; j<colonnes-lambdasur2; j++)
 		{
-			/*Calculation of the convolution for each color element*/
+			/*Calculation of the convolution for each canal*/
 			res0 = res1 = res2 = 0;
 			for (int u = coordMin; u <= coordMax; u++)
 			{
 				for (int v = coordMin; v <= coordMax; v++)
 				{
+					//sum of all neighbours value
 					res0 += image.data[(i+u)*pas+(j+v)*3+0];
 					res1 += image.data[(i+u)*pas+(j+v)*3+1];
 					res2 += image.data[(i+u)*pas+(j+v)*3+2];
 				}
 			} 
+			//multiplication by h = (1/lambda²) to achieve mean calculation
 			copie.data[i*pas+j*3+0] = res0 * h;
 			copie.data[i*pas+j*3+1] = res1 * h;
 			copie.data[i*pas+j*3+2] = res2 * h;
@@ -91,7 +93,7 @@ Mat spatialSmoothingAvgColor(const Mat & image, double lambda)
 
 
 /**
-* Calcul of a spatial smoothing on a greyscale picture
+* Calcul of a spatial smoothing on a grayscale picture
 * kernel = Gaussian
 */
 Mat spatialSmoothingGauss(const Mat & image, double sigma)
@@ -106,8 +108,8 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 	double unsur2sig = 1/(2*sigma);
 	double h;
 	
+	//pre-calculation of the kernel we will use 
 	std::vector<double> refu_v;
-	
 	for(int i = 0; i<3; i++)
 	{
 		for(int j = 0; j < 3; j++)
@@ -116,15 +118,17 @@ Mat spatialSmoothingGauss(const Mat & image, double sigma)
 		}
 	}
 	
-	for(int i = 1; i<lignes-1; i++)
+	for(int i = 1; i<lignes-1; i++) //the loop start at i = 1 and stop at lignes-1 to avoid considering with less than 8 neighbours
 	{
 		for(int j = 1; j < colonnes-1; j++)
 		{
+				/*Calculation of the convolution for each canal*/
 				res = 0;
 				for (int u = -1; u < 2; u++)
 				{
 					for (int v = -1; v < 2; v++)
 					{	
+						// getting the h corresponding to the considered neighbour (stored in the kernel)
 						h = refu_v[(u+1)*3+(v+1)];
 						res += h*(image.data[(i+u)*pas+(j+v)]);
 					}
@@ -151,6 +155,7 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 	double unsur2sig = 1/(2*sigma);
 	double h;
 	
+	//pre-calculation of the kernel we will use 
 	std::vector<double> refu_v;
 	
 	for(int i = 0; i<3; i++)
@@ -161,23 +166,23 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 		}
 	}
 	
-	for(int i = 1; i<lignes-1; i++)
+	for(int i = 1; i<lignes-1; i++) //the loop start at i = 1 and stop at lignes-1 to avoid considering with less than 8 neighbours
 	{
 		for(int j = 1; j < colonnes-1; j++)
 		{
+				/*Calculation of the convolution for each canal*/
 				res0 = res1 = res2 = 0;
 				for (int u = -1; u < 2; u++)
 				{
 					for (int v = -1; v < 2; v++)
 					{	
+						// getting the h corresponding to the considered neighbour (stored in the kernel)
 						h = refu_v[(u+1)*3+(v+1)];
-						//res += h*(image.data[(i+u)*colonnes+(j+v)]);
 						res0 += h * image.data[(i+u)*pas+(j+v)*3+0];
 						res1 += h * image.data[(i+u)*pas+(j+v)*3+1];
 						res2 += h * image.data[(i+u)*pas+(j+v)*3+2];
 					}
 				} 
-				//copie.data[i*colonnes+j] = (unsigned char)(res);
 				copie.data[i*pas+j*3+0] = (unsigned char) res0;
 				copie.data[i*pas+j*3+1] = (unsigned char) res1;
 				copie.data[i*pas+j*3+2] = (unsigned char) res2;
@@ -187,7 +192,7 @@ Mat spatialSmoothingGaussColor(const Mat & image, double sigma)
 }
 
 /***
-* Calcul of a spatial smoothing on a greyscale picture
+* Calcul of a spatial smoothing on a grayscale picture
 * kernel = Exponential
 */
 Mat spatialSmoothingExp(const Mat & image, double gamma)
@@ -200,8 +205,8 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 	double h;
 	double coeff = pow(gamma, 2)/4;
 	
+	//pre-calculation of the kernel we will use 
 	std::vector<double> refu_v;
-	
 	for(int i = 0; i<3; i++)
 	{
 		for(int j = 0; j < 3; j++)
@@ -210,15 +215,17 @@ Mat spatialSmoothingExp(const Mat & image, double gamma)
 		}
 	}
 	
-	for(int i = 1; i<lignes-1; i++)
+	for(int i = 1; i<lignes-1; i++) //the loop start at i = 1 and stop at lignes-1 to avoid considering with less than 8 neighbours
 	{
 		for(int j = 1; j < colonnes-1; j++)
 		{
+				/*Calculation of the convolution for each canal*/
 				res = 0;
 				for (int u = -1; u < 2; u++)
 				{
 					for (int v = -1; v < 2; v++)
 					{	
+						// getting the h corresponding to the considered neighbour (stored in the kernel)
 						h = refu_v[(u+1)*3+(v+1)];
 						res += h*(image.data[(i+u)*pas+(j+v)]);
 					}
@@ -243,8 +250,8 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 	double h;
 	double coeff = pow(gamma, 2)/4;
 	
+	//pre-calculation of the kernel we will use 
 	std::vector<double> refu_v;
-	
 	for(int i = 0; i<3; i++)
 	{
 		for(int j = 0; j < 3; j++)
@@ -253,22 +260,23 @@ Mat spatialSmoothingExpColor(const Mat & image, double gamma)
 		}
 	}
 	
-	for(int i = 1; i<lignes-1; i++)
+	for(int i = 1; i<lignes-1; i++) //the loop start at i = 1 and stop at lignes-1 to avoid considering with less than 8 neighbours
 	{
 		for(int j = 1; j < colonnes-1; j++)
 		{
+				/*Calculation of the convolution for each canal*/
 				res0 = res1 = res2 = 0;
 				for (int u = -1; u < 2; u++)
 				{
 					for (int v = -1; v < 2; v++)
 					{	
+						// getting the h corresponding to the considered neighbour (stored in the kernel)
 						h = refu_v[(u+1)*3+(v+1)];
 						res0 += h * image.data[(i+u)*pas+(j+v)*3+0];
 						res1 += h * image.data[(i+u)*pas+(j+v)*3+1];
 						res2 += h * image.data[(i+u)*pas+(j+v)*3+2];
 					}
 				} 
-				
 				copie.data[i*pas+j*3+0] = (unsigned char) res0;
 				copie.data[i*pas+j*3+1] = (unsigned char) res1;
 				copie.data[i*pas+j*3+2] = (unsigned char) res2;
@@ -325,7 +333,7 @@ Mat temporalSmoothingColor(String filename){
 }
 
 /**
- * Temporal smoothing for a greyscale picture
+ * Temporal smoothing for a grayscale picture
  */
 Mat temporalSmoothing(String filename){
 
@@ -397,16 +405,18 @@ Mat extractForegroundColor(const Mat & background, const Mat & frame){
             	if(abs(frame.data[i*pas+j*3+0] - background.data[i*pas+j*3+0]) > seuil
             	|| abs(frame.data[i*pas+j*3+1] - background.data[i*pas+j*3+1]) > seuil
             	|| abs(frame.data[i*pas+j*3+2] - background.data[i*pas+j*3+2]) > seuil){
-
+					// if the difference between the value of the frame pixel and of the background pixel
+					// (for each canal) is above a threshold, the frame pixel is part of the foreground
+					// and have to be extracted
                     res.data[i*pas+j*3+0] = frame.data[i*pas+j*3+0];
                     res.data[i*pas+j*3+1] = frame.data[i*pas+j*3+1];
                     res.data[i*pas+j*3+2] = frame.data[i*pas+j*3+2];
 				}
                 else{
+                	// if not, the pixel is colored in a certain color (depends on the values in constantes.h)
                 	res.data[i*pas+j*3+0] = BLUE;
                     res.data[i*pas+j*3+1] = GREEN;
                     res.data[i*pas+j*3+2] = RED;
-                    //opencv fonctionne en BGR et non en RGB
                 }
             }
         }
@@ -444,11 +454,13 @@ Mat extractForeground(const Mat & background, const Mat & frame)
             {
 
                 if(abs(frame.data[i*pas+j] - background.data[i*pas+j]) > seuil){
-
+					// if the difference between the value of the frame pixel and of the background pixel
+					// (for each canal) is above a threshold, the frame pixel is part of the foreground
+					// and have to be extracted
                     res.data[i*pas+j] = frame.data[i*pas+j];
-
                 }
                 else{	
+                	// if not, the pixel is colored in a certain color (depends on the values in constantes.h)
                     res.data[i*pas+j] = GRAY;
                 }
             }
@@ -527,10 +539,7 @@ Mat preciseSmoothing(Mat image, int nbrVoisin, int requis){
 * Merge of the blocs in various regions
 */
 std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double seuil )
-{
-	steady_clock::time_point start, end;
-	start = steady_clock::now();
-	
+{	
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int pas = image.step;
@@ -545,6 +554,8 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 	xmin = colonnes+1;
 	xmax = -1;
 
+	//proceesing of the picture's pixels to creata the first bloc as small as possible
+	//we look for the minimum and maximum x and y where we canfind a foreground pixel
 	for(int i = 0; i<lignes; i++)
 	{
 		for(int j = 0; j < colonnes; j++)
@@ -563,7 +574,9 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 				if (i<ymin)
 					ymin = i;
 				
-				//on fait la modification préalable
+				//filling an array with the squared values for each canal of each pixel 
+				//the goal of this pre-calcultation is to avoid calculate over and over the same values
+				//while splitting the blocs
 				tabCarres[i*colonnes*3+j*3+0] = (double)copie.data[i*pas+j*3+0] * (double)copie.data[i*pas+j*3+0];
 				tabCarres[i*colonnes*3+j*3+1] = (double)copie.data[i*pas+j*3+1] * (double)copie.data[i*pas+j*3+1];
 				tabCarres[i*colonnes*3+j*3+2] = (double)copie.data[i*pas+j*3+2] * (double)copie.data[i*pas+j*3+2];	
@@ -573,11 +586,12 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 
 	blocsATraiter.push_back(new Bloc(pixel (xmin, ymin), pixel (xmax, ymax)));
 	
+	//while there is still blocs we can split
 	while (!blocsATraiter.empty())
   	{
-  		temp = blocsATraiter.front();
+  		temp = blocsATraiter.front(); //getting the bloc we will work on
 		
-		if (temp->hasToBeSplitted(image, tabCarres, seuil))
+		if (temp->hasToBeSplitted(image, tabCarres, seuil)) //if the bloc has to be splitted
 		{
 			/*Split of the bloc in 4*/
 			int nvX, nvY;
@@ -594,7 +608,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 	
 			Bloc* bloc4  = new Bloc(pixel(nvX+hg.x+1, nvY+hg.y+1), pixel(bd.x, bd.y)); //OK
 	
-			/*Distribution of the neighbours of the bloc*/
+			/*Distribution of the neighbours of the old bloc among the new blocs*/
 	
 			for (auto itv = temp->getVoisins().begin(); itv != temp->getVoisins().end(); itv++)
 			{
@@ -608,6 +622,8 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 					}
 				}	
 			
+				//if the bloc1 is a neighbour of *it
+				//we add him to *it neighbour and vice versa
 				if (bloc1->estVoisin(**itv)){
 					bloc1->getVoisins().push_back(*itv);
 					(*itv)->getVoisins().push_back(bloc1);
@@ -629,7 +645,7 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 				}
 			}
 		
-			/*Insertion of the new blocs in the neigbours list*/
+			/*Insertion of the new blocs in each others neighbour list*/
 			bloc1->getVoisins().push_back(bloc2);
 			bloc1->getVoisins().push_back(bloc3);
 			bloc1->getVoisins().push_back(bloc4);
@@ -646,10 +662,10 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 			bloc4->getVoisins().push_back(bloc2);
 			bloc4->getVoisins().push_back(bloc3);
 			
-			/*Removal of the old bloc*/
+			/*Removal of the old bloc from the list of remaining blocs*/
 			blocsATraiter.pop_front();
 		
-			/*Insertion of the new bloc in the list*/
+			/*Insertion of the new blocs in the list of remaining blocs*/
 			blocsATraiter.push_back(bloc1);
 			blocsATraiter.push_back(bloc2);
 			blocsATraiter.push_back(bloc3);
@@ -658,7 +674,10 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 		}
 		else
 		{
+			/*Removal of the bloc from the list of remaining blocs*/
 			blocsATraiter.pop_front();
+			
+			/*Adding the bloc to the list of definitive blocs*/
 			blocsDefinitifs.push_back(temp);
 		}
 	}
@@ -670,9 +689,6 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 //		pixel bd = (*it)->getP_bd();
 //		rectangle(image, Point(hg.x,hg.y), Point (bd.x,bd.y), 1);
 //	}
-
-	end = steady_clock::now();
-	std::cout<<"time split : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
 	return blocsDefinitifs;
 }
 
@@ -682,8 +698,6 @@ std::list<Bloc*> split(const Mat & image, unsigned short int* tabCarres, double 
 std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const unsigned short int* tabCarres , double seuil)
 {
 	std::list<Bloc*> blocsLibres = blocs;
-	steady_clock::time_point start, end;
-	start = steady_clock::now();
 	int lignes = image.rows;
 	int colonnes = image.cols;
 	int pas = image.step;
@@ -693,49 +707,52 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 	Bloc* blocTemp;
 	Bloc* blocVois;
 	
-	/*Blocs contain the "free" blocs, who don't belongs to a region*/
+	/*BlocLibres contain the "free" blocs, who don't belongs to a region*/
+	
+	//while there is still free blocs to work on
 	while (!blocsLibres.empty())
 	{
 		/*Creation of a new region*/
-		blocTemp = blocsLibres.front();
+		blocTemp = blocsLibres.front(); //getting a free bloc
 		blocsLibres.pop_front();
 		regTemp = new Region();
+		//adding the free bloc to the region
 		regTemp->addBloc(blocTemp);
+		//calculation of the region variances
 		regTemp->updateVar(image, tabCarres);
+		//adding the bloc's neighbours to the region's neigbours
 		voisins.insert(voisins.end(), blocTemp->getVoisins().begin(), blocTemp->getVoisins().end());
-		/*process of the neighbours of the region (the free neigbours who are in the region)*/
 
+		//while the region still have neighbours to work on
 		while(!voisins.empty())
 		{
-			//depop du premier voisin
-			blocVois = voisins.front();
+			blocVois = voisins.front(); //getting a neighbour
 			voisins.pop_front();
 			std::list<Bloc*>::iterator it;
   			it = find (blocsLibres.begin(), blocsLibres.end(), blocVois);
-  			if (it != blocsLibres.end()){ //si il est dans les blocs libres
-  			  	//std::cout<<"L'un de mes voisins est libre"<<std::endl;
-				// si valeur ok -> on fusionnne	(ajout du bloc dans la région + ajout des voisins dans les voisins)
+  			if (it != blocsLibres.end()){ 
+  				//if the neighbour is free
 				if (regTemp->isConsistent(*blocVois, seuil)){
-					//fusion
+					// if the union between the region and the neighbour results in a homogeneous region
+					// we merge the region and the bloc 
 					regTemp->addBloc(blocVois);
 					regTemp->updateVar(image, tabCarres);
-					//ajout des voisins dans les voisins
+					//adding the neighbour's neighbours into the region's neighbours
 					voisins.insert(voisins.end(), blocVois->getVoisins().begin(), blocVois->getVoisins().end());
-					//on le retire des blocs libres
+					//removing the bloc from the list of free blocs
 					blocsLibres.erase(it);
 				}
-				//else le voisin ne nous interesse pas
-				// sinon rien
+				//if not, we are not interested in adding this neighbour to the region
   			}
-  			//else le voisin n'est pas libre, on ne le considère pas
-		} // il n'y a plus de voisins à explorer
+  			//if the neighbour is not free, we do not use it
+		} // there is no more neighbours to work on
 		
-		//ajout de la région dans la liste des régions definitives
+		//adding the region in the definitive region list
 		voisins.clear();
 		regionsDef.push_back(regTemp);
 	}
 	
-	//transformation de l'image de départ pour montrer les resultats du merge
+	// changing the picture to show the merge result
 	double * tabMoys;
 	int i = 0;
 	for (auto itReg = regionsDef.begin(); itReg != regionsDef.end(); itReg++)
@@ -743,7 +760,8 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 		tabMoys = (*itReg)->getMoy();
 		for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
 		{
-			//colorer chaque pixel avec la couleur moyenne de chaque région
+			//each pixel is colored with the average color of its region
+			//except if its a background pixel
 			pixel hg = (*itBloc)->getP_hg();
 			pixel bd = (*itBloc)->getP_bd();
 			for (int i = hg.y; i < bd.y; i++)
@@ -762,14 +780,15 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 			}
 		}
 	}
-	end = steady_clock::now();
-	std::cout<<"time merge : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
 	return regionsDef;
 }
 
 /**
 * Coloring the regions depending on their color on the image
 * The aim of this fonction is to realize the bodypart segmentation
+* This function is not usable, it was a test to see 
+* if the body part segementation was possible with our split and merge results.
+* We did not succeed because the region colors were to close from each other
 */
 void detectBodyParts(const std::list<Region*> regions, const Mat & image){
 	
@@ -780,6 +799,7 @@ void detectBodyParts(const std::list<Region*> regions, const Mat & image){
 	for (auto itReg = regions.begin(); itReg != regions.end(); itReg++)
 	{
 		tabMoys = (*itReg)->getMoy();
+		// if the region is "white", it should be the leg part of the character
 		if (tabMoys[0] >= 54 && tabMoys[0] <= 137 && tabMoys[1] >= 67 && tabMoys[1] <= 138 && tabMoys[2] >= 72 && tabMoys[2] <= 145){
 			
 			for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)
@@ -803,6 +823,7 @@ void detectBodyParts(const std::list<Region*> regions, const Mat & image){
 			}
 		}
 		
+		// if the region is "yellow/green", it should be the head of the character
 		if (tabMoys[0] >= 12 && tabMoys[0] <= 54 && tabMoys[1] >= 26 && tabMoys[1] <= 79 && tabMoys[2] >= 29 && tabMoys[2] <= 86){
 		
 			for (auto itBloc = (*itReg)->getBlocs().begin(); itBloc != (*itReg)->getBlocs().end(); itBloc++)

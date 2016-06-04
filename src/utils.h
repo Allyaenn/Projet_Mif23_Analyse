@@ -110,6 +110,9 @@ std::list<Region*> merge(const std::list<Bloc*> blocs, const Mat & image, const 
 /**
 * Coloring of pixels depending on their color
 * The aim of this fonction is to realize the bodypart segmentation
+* This function is not usable, it was a test to see 
+* if the body part segementation was possible with our split and merge results.
+* We did not succeed because the region colors were to close from each other
 */
 void detectBodyParts(const std::list<Region*> regions, const Mat & image);
 

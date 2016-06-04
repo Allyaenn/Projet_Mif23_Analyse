@@ -41,75 +41,49 @@ int main(int argc, char ** argv){
 		return EXIT_FAILURE;
 	}
 	
-    /*Nom des fichiers vidéos à exploiter*/
+    /*name of the video file we will work on*/
 	string filename_bg = String(argv[1]);
 	string filename_ps = String(argv[2]);
 
-	/** Image actuelle*/
+	/** Frame extracted from the video*/
 	Mat frame;
-	Mat frame_NB;
-	/** Image de fond lissées temporellement*/
+	
+	/** Frame used to work on */
+	Mat image;
+	
+	/** Background image temporally smoothed*/
     Mat background = temporalSmoothingColor(filename_bg);
-    Mat bg_NB = temporalSmoothing(filename_bg);
     
-    /**Image de  fond non lissées*/
-    Mat background2;
-    Mat bg_NB2;
-    /** Image extraite*/
-    Mat perso;
-    Mat perso_non_lissee;
-	Mat lisse;
 	/** Video*/
-    VideoCapture vc = VideoCapture(filename_bg);
-    vc >> background2;
-    cvtColor(background2, bg_NB2, CV_BGR2GRAY);
-
     VideoCapture vcP = VideoCapture(filename_ps);
     vcP >> frame;
 
-//    namedWindow("Perso", 1);
-//	namedWindow("Background", 1);
-//	namedWindow("Background_non_lissée", 1);
-
+	// spatial smoothing of the background
 	background = spatialSmoothingGaussColor(background, 1);
+	
     char c;
     c = (char)waitKey(1);
-    steady_clock::time_point start, end;
     while(c != 'q' && !frame.empty())
     {
-    	start = steady_clock::now();
-//    	perso = frame_NB;
-       	perso = spatialSmoothingGaussColor(frame, 1);
-       //perso = spatialSmoothingGauss(frame_NB,1);
-       	perso = extractForegroundColor(background, perso);
-       // splitAndMerge(perso);
-        //perso = extractForeground(bg_NB, frame_NB);
-        //perso = frame;
-        //perso = frame_NB;
-       // imshow("Perso", perso);
-//        imshow("Background", background);
-//        imshow("Background_non_lissée", background2);
-		lisse = preciseSmoothing(perso, 4, 28);
-		imshow("Lisse", lisse);
-        end = steady_clock::now();
-        std::cout<<"time : "<< duration_cast<milliseconds>(end-start).count()<<std::endl;
+       	image = spatialSmoothingGaussColor(frame, 1);
+       	image = extractForegroundColor(background, image);
+		image = preciseSmoothing(image, 4, 28);
+		imshow("Extracted Forgeround", image);
         c = (char)waitKey(1);
         vcP >> frame;
     }
     
-	namedWindow("Test", 1);
-
-	unsigned short int tabCarres [lisse.rows*lisse.cols*3];
-	for (int i = 0; i<lisse.rows*lisse.cols*3; i++)
+	unsigned short int tabCarres [image.rows*image.cols*3];
+	for (int i = 0; i<image.rows*image.cols*3; i++)
 		tabCarres[i] = 0;
-    std::list<Bloc*> blocs = split(lisse, tabCarres, 500);
-    merge(blocs, lisse, tabCarres, 10000);
+    std::list<Bloc*> blocs = split(image, tabCarres, 500);
+    merge(blocs, image, tabCarres, 10000);
     char d;
     d = (char)waitKey(1);
-    namedWindow("Test", 1);
+    namedWindow("Segmented Image", 1);
     while(d != 'q')
     {
-   		 imshow("Test", lisse);
+   		 imshow("Segmented Image", image);
    		 d = (char)waitKey(1);
    	}
    	
